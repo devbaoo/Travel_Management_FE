@@ -1,31 +1,56 @@
 import { Form, Input, Button, DatePicker, InputNumber, Select } from 'antd';
-import { useEffect, useState } from 'react';
 import moment from 'moment';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchSellers } from "../features/seller/sellerSlice"; // Import fetchSellers action
+import { fetchSellers } from "../features/seller/sellerSlice";
 
 const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
-  const dispatch = useDispatch();
-  const { sellers } = useSelector((state) => state.seller); // Get sellers from redux
   const [form] = Form.useForm();
-  const [price, setPrice] = useState(initialValues.price || 0); // State to handle price input
+  const dispatch = useDispatch();
+  const { sellers } = useSelector(state => state.seller);
+  const [price, setPrice] = useState(0);
 
-  // Reset form when initialValues change (for editing bookings)
+  // 1) Fetch sellers once
   useEffect(() => {
-    dispatch(fetchSellers()); // Fetch sellers when component mounts
-    form.resetFields();
-  }, [initialValues, dispatch]);
+    dispatch(fetchSellers());
+  }, [dispatch]);
 
-  // Handle price change
-  const handlePriceChange = (value) => {
-    setPrice(value);
-  };
+  // 2) Whenever initialValues changes, populate the form
+  useEffect(() => {
+    if (initialValues && initialValues.checkInDate) {
+      // EDIT mode: convert dates → moment
+      form.setFieldsValue({
+        customerName:   initialValues.customerName,
+        phoneNumber:    initialValues.phoneNumber,
+        serviceRequest: initialValues.serviceRequest,
+        guestCount:     initialValues.guestCount,
+        roomCount:      initialValues.roomCount,
+        roomClass:      initialValues.roomClass,
+        note:           initialValues.note,
+        sellerId:       initialValues.sellerId,
+        price:          initialValues.price,
+        checkInDate:    moment(initialValues.checkInDate),
+        checkOutDate:   moment(initialValues.checkOutDate),
+      });
+      setPrice(initialValues.price);
+    } else {
+      // NEW mode: clear & set defaults
+      form.resetFields();
+      form.setFieldsValue({
+        guestCount: 1,
+        roomCount:  1,
+        price:      0,
+      });
+      setPrice(0);
+    }
+  }, [initialValues, form]);
 
-  // Check if checkout date is after check-in date
+  const handlePriceChange = val => setPrice(val);
+
   const validateCheckOutDate = (_, value) => {
-    const checkInDate = form.getFieldValue('checkInDate');
-    if (checkInDate && value && moment(value).isBefore(moment(checkInDate))) {
-      return Promise.reject('Check-out date must be after check-in date');
+    const checkIn = form.getFieldValue('checkInDate');
+    if (checkIn && value && moment(value).isBefore(checkIn)) {
+      return Promise.reject('Check-out must be after check-in');
     }
     return Promise.resolve();
   };
@@ -34,13 +59,6 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
     <Form
       form={form}
       layout="vertical"
-      initialValues={{
-        ...initialValues,
-        checkInDate: initialValues.checkInDate ? moment(initialValues.checkInDate) : null,
-        checkOutDate: initialValues.checkOutDate ? moment(initialValues.checkOutDate) : null,
-        serviceRequest: initialValues.serviceRequest || '',  // Set default value for serviceRequest
-        sellerId: initialValues.sellerId || ''  // Set default value for sellerId
-      }}
       onFinish={onFinish}
     >
       <Form.Item
@@ -62,10 +80,9 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
       <Form.Item
         name="serviceRequest"
         label="Service Request"
-        initialValue={initialValues.serviceRequest || ''}
         rules={[
           { required: true, message: 'Please enter service request' },
-          { max: 255, message: 'Service request must be less than 255 characters' },
+          { max: 255, message: 'Must be under 255 characters' },
         ]}
       >
         <Input.TextArea style={{ minHeight: 100 }} />
@@ -76,7 +93,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
         label="Guest Count"
         rules={[{ required: true, message: 'Please enter guest count' }]}
       >
-        <InputNumber min={1} />
+        <InputNumber min={1} style={{ width: '100%' }} />
       </Form.Item>
 
       <Form.Item
@@ -84,7 +101,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
         label="Room Count"
         rules={[{ required: true, message: 'Please enter room count' }]}
       >
-        <InputNumber min={1} />
+        <InputNumber min={1} style={{ width: '100%' }} />
       </Form.Item>
 
       <Form.Item
@@ -97,28 +114,30 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
 
       <Form.Item
         name="checkInDate"
-        label="Check-in Date"
-        rules={[{ required: true, message: 'Please select check-in date' }]}
+        label="Check-in Date & Time"
+        rules={[{ required: true, message: 'Please select check-in date & time' }]}
       >
         <DatePicker
+          style={{ width: '100%' }}
           format="DD/MM/YYYY HH:mm"
-          showTime
-          disabledDate={(current) => current && current < moment().endOf('day')} // Disable past dates
+          showTime={{ format: 'HH:mm', minuteStep: 15 }}
+          disabledDate={d => d && d < moment().startOf('day')}
         />
       </Form.Item>
 
       <Form.Item
         name="checkOutDate"
-        label="Check-out Date"
+        label="Check-out Date & Time"
         rules={[
-          { required: true, message: 'Please select check-out date' },
-          { validator: validateCheckOutDate }, // Validate check-out date after check-in
+          { required: true, message: 'Please select check-out date & time' },
+          { validator: validateCheckOutDate },
         ]}
       >
         <DatePicker
+          style={{ width: '100%' }}
           format="DD/MM/YYYY HH:mm"
-          showTime
-          disabledDate={(current) => current && current < moment().endOf('day')} // Disable past dates
+          showTime={{ format: 'HH:mm', minuteStep: 15 }}
+          disabledDate={d => d && d < moment().startOf('day')}
         />
       </Form.Item>
 
@@ -132,6 +151,8 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
           step={1000}
           value={price}
           onChange={handlePriceChange}
+          formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+          parser={v => v.replace(/\./g, '')}
           style={{ width: '100%' }}
         />
       </Form.Item>
@@ -153,9 +174,9 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
             option.children.toLowerCase().includes(input.toLowerCase())
           }
         >
-          {sellers.map(seller => (
-            <Select.Option key={seller.id} value={seller.id}>
-              {seller.fullName} {/* Assuming seller has 'id' and 'name' properties */}
+          {sellers.map(s => (
+            <Select.Option key={s.id} value={s.id}>
+              {s.fullName}
             </Select.Option>
           ))}
         </Select>
