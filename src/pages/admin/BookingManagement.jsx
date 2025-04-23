@@ -1,10 +1,11 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { Table, Button, Modal, Popconfirm, message, Input, DatePicker } from 'antd';
-import { fetchBookings, createBooking, deleteBooking, updateBooking } from "../../features/booking/bookingSlice";
+import { Table, Button, Modal, Popconfirm, message, Input, DatePicker,Descriptions} from 'antd';
+import { fetchBookings, createBooking, deleteBooking, updateBooking , exportBookingPdf, exportBookingTxt} from "../../features/booking/bookingSlice";
 import { fetchSellers } from "../../features/seller/sellerSlice"; // Import fetchSellers
 import BookingForm from "../../components/BookingForm";
 import moment from 'moment';
+import { API_ENDPOINTS } from "../../configs/apiConfig"; // Import API endpoints
 
 const { Search } = Input;
 
@@ -18,6 +19,7 @@ const BookingManagement = () => {
   const [filteredBookings, setFilteredBookings] = useState(bookings); // filtered bookings state
   const [checkInDate, setCheckInDate] = useState(null);
   const [checkOutDate, setCheckOutDate] = useState(null);
+  const [viewingBooking, setViewingBooking] = useState(null);
 
   useEffect(() => {
     dispatch(fetchBookings());
@@ -28,6 +30,13 @@ const BookingManagement = () => {
     setFilteredBookings(bookings); // Update filtered bookings when `bookings` state changes
   }, [bookings]);
 
+  const handleExport = (type, id) => {
+    const url =
+      type === "pdf"
+        ? API_ENDPOINTS.EXPORT_BOOKING_PDF(id)
+        : API_ENDPOINTS.EXPORT_BOOKING_TXT(id);
+    window.open(url, "_blank");
+  };
   const handleCreateOrUpdate = async (formData) => {
     try {
       setSubmitLoading(true);
@@ -72,23 +81,13 @@ const BookingManagement = () => {
   // Hàm tìm kiếm với live search và lọc theo ngày
   const handleSearch = (value) => {
     const filtered = bookings.filter((booking) => {
-      // Lọc theo checkInDate và checkOutDate nếu đã chọn
-      const checkInMatch = checkInDate
-        ? moment(booking.checkInDate).isBetween(checkInDate, checkOutDate, null, '[]') || moment(booking.checkInDate).isSameOrAfter(checkInDate) // Kiểm tra ngày check-in trong khoảng
-        : true;  // Nếu không chọn checkInDate thì không lọc theo checkInDate
-  
-      const checkOutMatch = checkOutDate
-        ? moment(booking.checkOutDate).isBetween(checkInDate, checkOutDate, null, '[]') || moment(booking.checkOutDate).isSameOrBefore(checkOutDate) // Kiểm tra ngày check-out trong khoảng
-        : true;  // Nếu không chọn checkOutDate thì không lọc theo checkOutDate
-  
-      // Kết hợp với việc tìm kiếm theo customerName, phoneNumber, hoặc serviceRequest
+      
       const searchMatch =
         booking.customerName.toLowerCase().includes(value.toLowerCase()) ||
         booking.phoneNumber.toLowerCase().includes(value.toLowerCase()) ||
         booking.serviceRequest.toLowerCase().includes(value.toLowerCase());
   
-      // Lọc các booking theo ngày và tìm kiếm
-      return checkInMatch && checkOutMatch && searchMatch;
+      return  searchMatch;
     });
   
     setFilteredBookings(filtered); // Cập nhật danh sách booking đã lọc
@@ -104,10 +103,30 @@ const BookingManagement = () => {
   const columns = [
     { title: "Customer Name", dataIndex: "customerName" },
     { title: "Phone", dataIndex: "phoneNumber" },
-    { title: "Service Request", dataIndex: "serviceRequest", 
-      render: (text) => <div style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>{text}</div> },
-    { title: "Guest Count", dataIndex: "guestCount" },
-    { title: "Room Count", dataIndex: "roomCount" },
+    {
+      title: "Service Request",
+      dataIndex: "serviceRequest",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (text) => (
+        <span title={text}>
+          {text.length > 40 ? `${text.slice(0, 40)}...` : text}
+        </span>
+      ),
+    },
+    {
+      title: "Guest Count",
+      dataIndex: "guestCount",
+      width: 80,
+      align: 'center',
+    },
+    {
+      title: "Room Count",
+      dataIndex: "roomCount",
+      width: 80,
+      align: 'center',
+    },
     {
       title: "Check-in Date",
       dataIndex: "checkInDate",
@@ -137,11 +156,39 @@ const BookingManagement = () => {
           >
             Edit
           </Button>
+          <Button
+            size="small"
+            onClick={() => setViewingBooking(record)}
+            style={{ marginRight: 8 }}
+            type="dashed"
+          >
+            Detail
+          </Button>
           <Popconfirm title="Are you sure?" onConfirm={() => handleDelete(record.id)}>
             <Button size="small" danger>
               Delete
             </Button>
           </Popconfirm>
+        </>
+      ),
+    },
+    {
+      title: "Export",
+      render: (_, record) => (
+        <>
+          <Button
+            size="small"
+            style={{ marginRight: 8 }}
+            onClick={() => handleExport("pdf", record.id)}
+          >
+            PDF
+          </Button>
+          <Button
+            size="small"
+            onClick={() => handleExport("txt", record.id)}
+          >
+            TXT
+          </Button>
         </>
       ),
     },
@@ -168,26 +215,6 @@ const BookingManagement = () => {
           onChange={(e) => handleSearch(e.target.value)} // Live search
           style={{ width: 400 }} // Bạn có thể điều chỉnh chiều rộng của ô tìm kiếm tại đây
         />
-
-        {/* Date Pickers for filtering
-        <DatePicker
-          placeholder="Check-in Date"
-          onChange={(date) => {
-            setCheckInDate(date);
-            handleSearch(""); // Re-trigger search when date changes
-          }}
-          format="DD/MM/YYYY"
-          style={{ marginLeft: 16 }}
-        />
-        <DatePicker
-          placeholder="Check-out Date"
-          onChange={(date) => {
-            setCheckOutDate(date);
-            handleSearch(""); // Re-trigger search when date changes
-          }}
-          format="DD/MM/YYYY"
-          style={{ marginLeft: 16 }}
-        /> */}
       </div>
 
       <Table
@@ -195,8 +222,65 @@ const BookingManagement = () => {
         columns={columns}
         rowKey="id"
         loading={loading}
-        pagination={false} // Disable pagination if you want to show all results
       />
+      <Modal
+        open={!!viewingBooking}
+        title="Booking Details"
+        onCancel={() => setViewingBooking(null)}
+        width={700}
+        destroyOnClose
+        centered
+        maskClosable={false}
+        closable={false}
+        footer={[
+        <Button key="close" onClick={() => setViewingBooking(null)}>
+          Close
+        </Button>,
+  ]}
+>
+  {viewingBooking && (
+    <Descriptions column={1} bordered size="small">
+    <Descriptions.Item label="Customer Name">{viewingBooking.customerName}</Descriptions.Item>
+      <Descriptions.Item label="Phone">{viewingBooking.phoneNumber}</Descriptions.Item>
+
+      <Descriptions.Item label="Service Request" span={2}>
+        {viewingBooking.serviceRequest}
+      </Descriptions.Item>
+
+      <Descriptions.Item label="Guest Count">{viewingBooking.guestCount}</Descriptions.Item>
+      <Descriptions.Item label="Room Count">{viewingBooking.roomCount}</Descriptions.Item>
+
+      <Descriptions.Item label="Room Class">{viewingBooking.roomClass}</Descriptions.Item>
+      <Descriptions.Item label="Check-in Date">
+        {moment(viewingBooking.checkInDate).format("DD/MM/YYYY")}
+      </Descriptions.Item>
+      <Descriptions.Item label="Check-out Date">
+        {moment(viewingBooking.checkOutDate).format("DD/MM/YYYY")}
+      </Descriptions.Item>
+
+      <Descriptions.Item label="Price" span={2}>
+        {formatCurrency(viewingBooking.price)}
+      </Descriptions.Item>
+
+      <Descriptions.Item label="Note" span={2}>
+        {viewingBooking.note || "-"}
+      </Descriptions.Item>
+      <Descriptions.Item label="Seller Name">{viewingBooking.seller?.fullName}</Descriptions.Item>
+  <Descriptions.Item label="Seller Phone">{viewingBooking.seller?.phoneNumber}</Descriptions.Item>
+  <Descriptions.Item label="Seller Email" span={2}>{viewingBooking.seller?.email}</Descriptions.Item>
+  {viewingBooking.seller?.qrCodeUrl && (
+    <Descriptions.Item label="QR Code" span={2}>
+      <img
+        src={viewingBooking.seller.qrCodeUrl}
+        alt="QR Code"
+        style={{ maxWidth: "120px", border: "1px solid #eee", padding: 4 }}
+      />
+    </Descriptions.Item>
+  )}
+
+    </Descriptions>
+  )}
+</Modal>
 
       <Modal
         open={isModalOpen}
