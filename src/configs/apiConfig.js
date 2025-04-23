@@ -19,4 +19,7 @@ export const API_ENDPOINTS = {
   // Export endpoints
   EXPORT_BOOKING_PDF: (id) => `${API_BASE_URL}/api/bookings/${id}/export`,
   EXPORT_BOOKING_TXT: (id) => `${API_BASE_URL}/api/bookings/${id}/export-txt`,
+
+  //Dashboard endpoints
+  GET_DASHBOARD: `${API_BASE_URL}/api/get-dashboard`,
 };
