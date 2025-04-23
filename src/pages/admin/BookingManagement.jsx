@@ -111,9 +111,9 @@ const BookingManagement = () => {
       },
       render: (text) => (
         <span title={text}>
-          {text.length > 40 ? `${text.slice(0, 40)}...` : text}
+          {text?.length > 40 ? `${text.slice(0, 40)}...` : text || '-'}
         </span>
-      ),
+      )
     },
     {
       title: "Guest Count",
