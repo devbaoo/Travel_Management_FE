@@ -1,10 +1,11 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input, message } from 'antd';
+import { Button, Checkbox, Form, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/AuthContext';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../configs/apiConfig';
 import { useEffect } from 'react';
+import { toast } from 'react-toastify'; // dùng toast thay message
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -27,27 +28,36 @@ const LoginPage = () => {
         const { token, seller } = res.data.data;
         login(seller, token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        message.success('Đăng nhập thành công!');
+        toast.success('Đăng nhập thành công!');
         navigate('/admin/dashboard');
       } else {
-        message.error(res.data.errMessage);
+        toast.error(res.data.errMessage || 'Đăng nhập thất bại');
       }
     } catch (err) {
       console.error('Login error:', err);
-      message.error('Lỗi server hoặc thông tin không đúng.');
+      toast.error('Lỗi server hoặc thông tin không đúng.');
     }
   };
 
   return (
     <>
-      {/* CSS để chỉnh placeholder thành màu trắng */}
       <style>{`
-        .custom-placeholder input::placeholder {
-         color: rgba(255, 255, 255, 0.7) !important;
-        opacity: 1;
-        }
-      `}</style>
+  .custom-placeholder input::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+    opacity: 1;
+  }
 
+  input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  border: none !important;
+  -webkit-box-shadow: 0 0 0px 1000px #1f1f1f inset !important;
+  -webkit-text-fill-color: #f0c040 !important;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: #f0c040 !important;
+  outline: none !important;
+}
+`}</style>
       <div
         style={{
           height: '100vh',

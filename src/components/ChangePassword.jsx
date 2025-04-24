@@ -1,6 +1,7 @@
-import { Modal, Form, Input, message } from "antd";
+import { Modal, Form, Input } from "antd";
 import { useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify"; // 👈 dùng toast thay message
 import { API_ENDPOINTS } from "../configs/apiConfig";
 import { useAuth } from "../utils/AuthContext";
 
@@ -23,21 +24,21 @@ const ChangePassword = ({ visible, onClose }) => {
           );
 
           if (res.data.errCode === 0) {
-            message.success("Đổi mật khẩu thành công");
+            toast.success("Đổi mật khẩu thành công");
             form.resetFields();
             onClose();
           } else {
-            message.error(res.data.errMessage || "Đổi mật khẩu thất bại");
+            toast.error(res.data.errMessage || " Đổi mật khẩu thất bại");
           }
         } catch (err) {
           console.error("Error changing password:", err);
-          message.error("Đã xảy ra lỗi");
+          toast.error(" Đã xảy ra lỗi");
         } finally {
           setLoading(false);
         }
       })
       .catch(() => {
-        // Form validation failed
+        // Validation failed - no need to toast
       });
   };
 

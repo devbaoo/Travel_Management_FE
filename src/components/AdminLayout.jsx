@@ -7,8 +7,8 @@ import {
 } from "@ant-design/icons";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useState } from "react";
-import { useAuth } from "../utils/AuthContext"; 
-import ChangePassword from "./ChangePassword"; 
+import { useAuth } from "../utils/AuthContext";
+import ChangePassword from "./ChangePassword";
 import UpdateProfile from "./UpdateProfile";
 import logo from "../assets/logo.png";
 
@@ -35,17 +35,17 @@ const AdminLayout = () => {
     {
       key: "/admin/dashboard",
       icon: <DashboardOutlined />,
-      label: "Dashboard",
+      label: "Thống kê",
     },
     {
       key: "/admin/sellers",
       icon: <UserOutlined />,
-      label: "Sellers",
+      label: "Người bán",
     },
     {
       key: "/admin/bookings",
       icon: <ScheduleOutlined />,
-      label: "Bookings",
+      label: "Đặt phòng",
     },
   ];
 
@@ -61,10 +61,16 @@ const AdminLayout = () => {
     {
       key: "logout",
       icon: <LogoutOutlined />,
-      label: <span onClick={() => {
-        logout();
-        navigate("/login");
-      }}>Đăng xuất</span>,
+      label: (
+        <span
+          onClick={() => {
+            logout();
+            navigate("/login");
+          }}
+        >
+          Đăng xuất
+        </span>
+      ),
     },
   ];
 
@@ -85,12 +91,12 @@ const AdminLayout = () => {
         }}
       >
         <div style={{ color: "#fff", textAlign: "center", padding: "16px", fontWeight: "bold" }}>
-          Quản lí
+          Quản lý hệ thống
         </div>
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
           <img
             src={logo}
-            alt="Brand Logo"
+            alt="Logo"
             style={{ width: "80%", height: "auto" }}
           />
         </div>
@@ -145,13 +151,16 @@ const AdminLayout = () => {
           <Outlet />
         </Content>
       </Layout>
+
       <ChangePassword
-  visible={isPasswordModalOpen}
-  onClose={() => setIsPasswordModalOpen(false)}
-/>
-<UpdateProfile visible={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
+        visible={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+      />
+      <UpdateProfile
+        visible={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
     </Layout>
-    
   );
 };
 
