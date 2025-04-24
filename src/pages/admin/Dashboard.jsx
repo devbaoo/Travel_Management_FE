@@ -3,7 +3,7 @@ import { Card, Col, Row, Statistic, Typography, Spin } from "antd";
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../configs/apiConfig";
-
+// import AnimatedPage from "../../components/AnimationPage";
 
 const { Title } = Typography;
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA00FF', '#00B8D9'];
@@ -93,6 +93,7 @@ const Dashboard = () => {
       </Row>
     </div>
   );
+  
 };
 
 export default Dashboard;

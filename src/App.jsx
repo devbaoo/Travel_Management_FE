@@ -1,16 +1,15 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import LoginPage from "./components/Login";
 import AdminRoutes from "./pages/admin/AdminRoute";
 
-function App() {
+const AppRoutes = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/admin/sellers" replace />} />
-        <Route path="/admin/*" element={<AdminRoutes />} />
-        <Route path="*" element={<div>Page Not Found</div>} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/admin/*" element={<AdminRoutes />} />
+      <Route path="*" element= {<AdminRoutes />}/>
+    </Routes>
   );
-}
+};
 
-export default App;
+export default AppRoutes;

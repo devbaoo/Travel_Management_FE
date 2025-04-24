@@ -1,16 +1,35 @@
-import { Layout, Menu } from "antd";
-import { UserOutlined, DashboardOutlined, ScheduleOutlined } from "@ant-design/icons";
+import { Layout, Menu, Dropdown, Avatar, Space } from "antd";
+import {
+  UserOutlined,
+  DashboardOutlined,
+  ScheduleOutlined,
+  LogoutOutlined,
+} from "@ant-design/icons";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useState } from "react";
-import logo from "../assets/logo.png"; // Adjust the import based on your project structure
+import { useAuth } from "../utils/AuthContext"; 
+import ChangePassword from "./ChangePassword"; 
+import UpdateProfile from "./UpdateProfile";
+import logo from "../assets/logo.png";
 
 const { Header, Sider, Content } = Layout;
 
 const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const { user, logout } = useAuth();
 
-  const [collapsed, setCollapsed] = useState(false); // Track the collapsed state of the Sider
+  const handleClick = (e) => {
+    if (e.key === "/admin/logout") {
+      logout();
+      navigate("/login");
+    } else {
+      navigate(e.key);
+    }
+  };
 
   const menuItems = [
     {
@@ -30,28 +49,39 @@ const AdminLayout = () => {
     },
   ];
 
-  const handleClick = ({ key }) => {
-    if (key === "/logout") {
-      // Handle logout logic here
-      return;
-    }
-    navigate(key);
-  };
+  const dropdownMenu = [
+    {
+      key: "update-profile",
+      label: <span onClick={() => setIsProfileModalOpen(true)}>Cập nhật hồ sơ</span>,
+    },
+    {
+      key: "change-password",
+      label: <span onClick={() => setIsPasswordModalOpen(true)}>Đổi mật khẩu</span>,
+    },
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: <span onClick={() => {
+        logout();
+        navigate("/login");
+      }}>Đăng xuất</span>,
+    },
+  ];
 
   return (
-    <Layout style={{ minHeight: "100vh" }}> {/* Make sure the layout takes full height */}
+    <Layout style={{ minHeight: "100vh" }}>
       <Sider
         width={200}
         collapsible
-        collapsed={collapsed}  // Control collapse state
-        onCollapse={(collapsed) => setCollapsed(collapsed)}  // Toggle collapse state
+        collapsed={collapsed}
+        onCollapse={(collapsed) => setCollapsed(collapsed)}
         style={{
           position: "fixed",
           left: 0,
           top: 0,
           bottom: 0,
-          backgroundColor: "#001529", // You can customize the color
-          transition: "all 0.3s", // Smooth transition effect for the layout when sidebar collapses
+          backgroundColor: "#001529",
+          transition: "all 0.3s",
         }}
       >
         <div style={{ color: "#fff", textAlign: "center", padding: "16px", fontWeight: "bold" }}>
@@ -59,9 +89,9 @@ const AdminLayout = () => {
         </div>
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
           <img
-            src={logo} // Replace with the actual path to your logo
+            src={logo}
             alt="Brand Logo"
-            style={{ width: "80%", height: "auto" }} // You can adjust the size here
+            style={{ width: "80%", height: "auto" }}
           />
         </div>
         <Menu
@@ -72,39 +102,56 @@ const AdminLayout = () => {
           items={menuItems}
         />
       </Sider>
-      <Layout style={{ marginLeft: collapsed ? 80 : 200 }}> {/* Offset the content to the right when collapsed */}
-      <Header style={{
-          background: "#fff", 
-          paddingLeft: 20,
-          display: "flex",
-          justifyContent: "center",  // Center the text horizontally
-          alignItems: "center", // Center the text vertically
-        }}>
-          <h2 style={{
-            fontFamily: "'Playfair Display', serif", // Artistic font from Google Fonts
-            fontWeight: "700", // Bold font
-            fontSize: "36px",  // Larger font size
-            color: "#d49f3a",  // Make the text standout
-            letterSpacing: "2px", // Add spacing between letters
-            margin: 0,  // Remove default margin
-            textAlign: "center",  // Ensure the text is centered
-          }}>
+
+      <Layout style={{ marginLeft: collapsed ? 80 : 200 }}>
+        <Header
+          style={{
+            background: "#fff",
+            padding: "0 24px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: "700",
+              fontSize: "32px",
+              color: "#d49f3a",
+              margin: 0,
+              letterSpacing: "1px",
+            }}
+          >
             Thành Phát Global
           </h2>
+          <Dropdown menu={{ items: dropdownMenu }}>
+            <Space style={{ cursor: "pointer" }}>
+              <Avatar icon={<UserOutlined />} />
+              {user?.fullName}
+            </Space>
+          </Dropdown>
         </Header>
+
         <Content
           style={{
             margin: "24px 16px",
             padding: 24,
-            minHeight: "calc(100vh - 64px)", // Adjust content height based on header
+            minHeight: "calc(100vh - 64px)",
             backgroundColor: "#fff",
-            transition: "all 0.3s",  // Smooth transition effect for content when sidebar collapses
+            transition: "all 0.3s",
           }}
         >
-          <Outlet /> {/* Nested route render */}
+          <Outlet />
         </Content>
       </Layout>
+      <ChangePassword
+  visible={isPasswordModalOpen}
+  onClose={() => setIsPasswordModalOpen(false)}
+/>
+<UpdateProfile visible={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     </Layout>
+    
   );
 };
 
