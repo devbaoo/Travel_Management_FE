@@ -4,20 +4,19 @@ import { useEffect } from "react";
 
 const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
   const [form] = Form.useForm();
+  const isUpdate = !!initialValues?.id;
 
-  // Reset form when initialValues change
   useEffect(() => {
     form.resetFields();
 
     if (initialValues?.qrCodeUrl) {
-      // Set the existing QR code image URL as preview in fileList
       form.setFieldsValue({
         qrCodeFile: [
           {
-            uid: "-1",  // Unique UID for the existing file
-            name: "qr-code.jpg",  // Can be any name you prefer
-            status: "done",  // Mark it as "done" because the file already exists
-            url: initialValues.qrCodeUrl,  // Existing URL of the QR code image
+            uid: "-1",
+            name: "qr-code.jpg",
+            status: "done",
+            url: initialValues.qrCodeUrl,
           },
         ],
       });
@@ -30,13 +29,15 @@ const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
     formData.append("phoneNumber", values.phoneNumber);
     formData.append("email", values.email);
 
-    // Handle the file selection
-    const fileObj = values.qrCodeFile?.[0];
-    if (fileObj?.originFileObj) {
-      formData.append("qrCodeFile", fileObj.originFileObj); // Append the selected file
+    if (!isUpdate) {
+      formData.append("password", values.password); // only on create
     }
 
-    // Call the provided onFinish function with the formData
+    const fileObj = values.qrCodeFile?.[0];
+    if (fileObj?.originFileObj) {
+      formData.append("qrCodeFile", fileObj.originFileObj); // Only if selected
+    }
+
     onFinish(formData);
   };
 
@@ -45,9 +46,9 @@ const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
       form={form}
       layout="vertical"
       initialValues={{
-        fullName: initialValues?.fullName || '',
-        phoneNumber: initialValues?.phoneNumber || '',
-        email: initialValues?.email || '',
+        fullName: initialValues?.fullName || "",
+        phoneNumber: initialValues?.phoneNumber || "",
+        email: initialValues?.email || "",
       }}
       onFinish={handleFormSubmit}
     >
@@ -75,32 +76,39 @@ const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
         <Input />
       </Form.Item>
 
+      {!isUpdate && (
+        <Form.Item
+          name="password"
+          label="Password"
+          rules={[{ required: true, message: "Please enter password" }]}
+        >
+          <Input.Password />
+        </Form.Item>
+      )}
+
       <Form.Item name="qrCodeFile" label="QR Code Image">
         <Upload
           listType="picture-card"
-          maxCount={1}  // Limit to 1 file
-          beforeUpload={() => false}  // Prevent auto-upload
+          maxCount={1}
+          beforeUpload={() => false}
           onChange={(info) => {
             const { fileList } = info;
 
-            // Only allow one file to be uploaded
-            if (fileList.length > 1) {
-              fileList.shift();  // Remove any extra file
-            }
+            if (fileList.length > 1) fileList.shift();
 
-            // Create a URL for the uploaded file to preview it immediately
-            const updatedList = fileList.map(file => ({
+            const updatedList = fileList.map((file) => ({
               ...file,
               url: file.originFileObj ? URL.createObjectURL(file.originFileObj) : file.url,
             }));
 
             form.setFieldsValue({
-              qrCodeFile: updatedList,  // Update the form field with the new file
+              qrCodeFile: updatedList,
             });
           }}
         >
           <Button icon={<UploadOutlined />}>Select File</Button>
         </Upload>
+        <small style={{ color: "#aaa" }}>(Không bắt buộc)</small>
       </Form.Item>
 
       <Form.Item>
