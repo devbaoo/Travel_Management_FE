@@ -1,8 +1,16 @@
-import { Form, Input, Button, DatePicker, InputNumber, Select } from 'antd';
+import {
+  Form,
+  Input,
+  Button,
+  DatePicker,
+  InputNumber,
+  Select
+} from 'antd';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSellers } from "../features/seller/sellerSlice";
+import { toast } from 'react-toastify';
 
 const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
   const [form] = Form.useForm();
@@ -10,36 +18,32 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
   const { sellers } = useSelector(state => state.seller);
   const [price, setPrice] = useState(0);
 
-  // 1) Fetch sellers once
   useEffect(() => {
     dispatch(fetchSellers());
   }, [dispatch]);
 
-  // 2) Whenever initialValues changes, populate the form
   useEffect(() => {
     if (initialValues && initialValues.checkInDate) {
-      // EDIT mode: convert dates → moment
       form.setFieldsValue({
-        customerName:   initialValues.customerName,
-        phoneNumber:    initialValues.phoneNumber,
+        customerName: initialValues.customerName,
+        phoneNumber: initialValues.phoneNumber,
         serviceRequest: initialValues.serviceRequest,
-        guestCount:     initialValues.guestCount,
-        roomCount:      initialValues.roomCount,
-        roomClass:      initialValues.roomClass,
-        note:           initialValues.note,
-        sellerId:       initialValues.sellerId,
-        price:          initialValues.price,
-        checkInDate:    moment(initialValues.checkInDate),
-        checkOutDate:   moment(initialValues.checkOutDate),
+        guestCount: initialValues.guestCount,
+        roomCount: initialValues.roomCount,
+        roomClass: initialValues.roomClass,
+        note: initialValues.note,
+        sellerId: initialValues.sellerId,
+        price: initialValues.price,
+        checkInDate: moment(initialValues.checkInDate),
+        checkOutDate: moment(initialValues.checkOutDate),
       });
       setPrice(initialValues.price);
     } else {
-      // NEW mode: clear & set defaults
       form.resetFields();
       form.setFieldsValue({
         guestCount: 1,
-        roomCount:  1,
-        price:      0,
+        roomCount: 1,
+        price: 0,
       });
       setPrice(0);
     }
@@ -50,72 +54,81 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
   const validateCheckOutDate = (_, value) => {
     const checkIn = form.getFieldValue('checkInDate');
     if (checkIn && value && moment(value).isBefore(checkIn)) {
-      return Promise.reject('Check-out must be after check-in');
+      return Promise.reject('Ngày trả phòng phải sau ngày nhận phòng');
     }
     return Promise.resolve();
+  };
+
+  const handleSubmit = async (values) => {
+    try {
+      await onFinish(values);
+      form.resetFields();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
     <Form
       form={form}
       layout="vertical"
-      onFinish={onFinish}
+      onFinish={handleSubmit}
     >
       <Form.Item
         name="customerName"
-        label="Customer Name"
-        rules={[{ required: true, message: 'Please enter customer name' }]}
+        label="Tên khách hàng"
+        rules={[{ required: true, message: 'Vui lòng nhập tên khách hàng' }]}
       >
-        <Input />
+        <Input placeholder="Nguyễn Văn A" />
       </Form.Item>
 
       <Form.Item
         name="phoneNumber"
-        label="Phone"
-        rules={[{ required: true, message: 'Please enter phone number' }]}
+        label="Số điện thoại"
+        rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
       >
-        <Input />
+        <Input placeholder="0123456789" />
       </Form.Item>
 
       <Form.Item
         name="serviceRequest"
-        label="Service Request"
+        label="Yêu cầu dịch vụ"
         rules={[
-          { required: true, message: 'Please enter service request' },
-          { max: 255, message: 'Must be under 255 characters' },
+          { required: true, message: 'Vui lòng nhập yêu cầu dịch vụ' },
+          { max: 255, message: 'Tối đa 255 ký tự' },
         ]}
       >
-        <Input.TextArea style={{ minHeight: 100 }} />
+        <Input.TextArea style={{ minHeight: 100 }} placeholder="Ví dụ: Dọn phòng, giặt ủi, v.v." />
       </Form.Item>
 
       <Form.Item
         name="guestCount"
-        label="Guest Count"
-        rules={[{ required: true, message: 'Please enter guest count' }]}
+        label="Số khách"
+        rules={[{ required: true, message: 'Vui lòng nhập số khách' }]}
       >
-        <InputNumber min={1} style={{ width: '100%' }} />
+        <InputNumber min={1} style={{ width: '100%' }} placeholder="1" />
       </Form.Item>
 
       <Form.Item
         name="roomCount"
-        label="Room Count"
-        rules={[{ required: true, message: 'Please enter room count' }]}
+        label="Số phòng"
+        rules={[{ required: true, message: 'Vui lòng nhập số phòng' }]}
       >
-        <InputNumber min={1} style={{ width: '100%' }} />
+        <InputNumber min={1} style={{ width: '100%' }} placeholder="1" />
       </Form.Item>
 
       <Form.Item
         name="roomClass"
-        label="Room Class"
-        rules={[{ required: true, message: 'Please enter room class' }]}
+        label="Hạng phòng"
+        rules={[{ required: true, message: 'Vui lòng nhập hạng phòng' }]}
       >
-        <Input />
+        <Input/>
       </Form.Item>
 
       <Form.Item
         name="checkInDate"
-        label="Check-in Date & Time"
-        rules={[{ required: true, message: 'Please select check-in date & time' }]}
+        label="Ngày & giờ nhận phòng"
+        rules={[{ required: true, message: 'Vui lòng chọn ngày & giờ nhận phòng' }]}
       >
         <DatePicker
           style={{ width: '100%' }}
@@ -127,9 +140,9 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
 
       <Form.Item
         name="checkOutDate"
-        label="Check-out Date & Time"
+        label="Ngày & giờ trả phòng"
         rules={[
-          { required: true, message: 'Please select check-out date & time' },
+          { required: true, message: 'Vui lòng chọn ngày & giờ trả phòng' },
           { validator: validateCheckOutDate },
         ]}
       >
@@ -143,8 +156,8 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
 
       <Form.Item
         name="price"
-        label="Price"
-        rules={[{ required: true, message: 'Please enter price' }]}
+        label="Giá"
+        rules={[{ required: true, message: 'Vui lòng nhập giá' }]}
       >
         <InputNumber
           min={0}
@@ -154,21 +167,22 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
           formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
           parser={v => v.replace(/\./g, '')}
           style={{ width: '100%' }}
+          placeholder="Ví dụ: 500000"
         />
       </Form.Item>
 
-      <Form.Item name="note" label="Note">
-        <Input.TextArea />
+      <Form.Item name="note" label="Ghi chú">
+        <Input.TextArea placeholder="Thêm ghi chú (nếu có)" />
       </Form.Item>
 
       <Form.Item
         name="sellerId"
-        label="Seller"
-        rules={[{ required: true, message: 'Please select a seller' }]}
+        label="Người bán"
+        rules={[{ required: true, message: 'Vui lòng chọn người bán' }]}
       >
         <Select
           showSearch
-          placeholder="Select a seller"
+          placeholder="Chọn người bán"
           optionFilterProp="children"
           filterOption={(input, option) =>
             option.children.toLowerCase().includes(input.toLowerCase())
@@ -183,8 +197,8 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
       </Form.Item>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>
-          Submit
+        <Button type="primary" htmlType="submit" loading={loading} block>
+          Lưu thông tin
         </Button>
       </Form.Item>
     </Form>

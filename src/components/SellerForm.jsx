@@ -1,6 +1,7 @@
 import { Form, Input, Upload, Button } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
   const [form] = Form.useForm();
@@ -23,22 +24,28 @@ const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
     }
   }, [initialValues, form]);
 
-  const handleFormSubmit = (values) => {
+  const handleFormSubmit = async (values) => {
     const formData = new FormData();
     formData.append("fullName", values.fullName);
     formData.append("phoneNumber", values.phoneNumber);
     formData.append("email", values.email);
 
     if (!isUpdate) {
-      formData.append("password", values.password); // only on create
+      formData.append("password", values.password);
     }
 
     const fileObj = values.qrCodeFile?.[0];
     if (fileObj?.originFileObj) {
-      formData.append("qrCodeFile", fileObj.originFileObj); // Only if selected
+      formData.append("qrCodeFile", fileObj.originFileObj);
     }
 
-    onFinish(formData);
+    try {
+      await onFinish(formData);
+      toast.success(isUpdate ? "Cập nhật người bán thành công!" : "Tạo người bán mới thành công!");
+      form.resetFields();
+    } catch (error) {
+      toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+    }
   };
 
   return (
@@ -54,46 +61,45 @@ const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
     >
       <Form.Item
         name="fullName"
-        label="Full Name"
-        rules={[{ required: true, message: "Please enter full name" }]}
+        label="Họ và tên"
+        rules={[{ required: true, message: "Vui lòng nhập họ tên" }]}
       >
-        <Input />
+        <Input placeholder="Nguyễn Văn A" />
       </Form.Item>
 
       <Form.Item
         name="phoneNumber"
-        label="Phone"
-        rules={[{ required: true, message: "Please enter phone number" }]}
+        label="Số điện thoại"
+        rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
       >
-        <Input />
+        <Input placeholder="0123456789" />
       </Form.Item>
 
       <Form.Item
         name="email"
         label="Email"
-        rules={[{ required: true, type: "email", message: "Invalid email" }]}
+        rules={[{ required: true, type: "email", message: "Email không hợp lệ" }]}
       >
-        <Input />
+        <Input placeholder="example@email.com" />
       </Form.Item>
 
       {!isUpdate && (
         <Form.Item
           name="password"
-          label="Password"
-          rules={[{ required: true, message: "Please enter password" }]}
+          label="Mật khẩu"
+          rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
         >
-          <Input.Password />
+          <Input.Password placeholder="********" />
         </Form.Item>
       )}
 
-      <Form.Item name="qrCodeFile" label="QR Code Image">
+      <Form.Item name="qrCodeFile" label="Hình ảnh mã QR">
         <Upload
           listType="picture-card"
           maxCount={1}
           beforeUpload={() => false}
           onChange={(info) => {
             const { fileList } = info;
-
             if (fileList.length > 1) fileList.shift();
 
             const updatedList = fileList.map((file) => ({
@@ -106,14 +112,14 @@ const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
             });
           }}
         >
-          <Button icon={<UploadOutlined />}>Select File</Button>
+          <Button icon={<UploadOutlined />}>Chọn tệp</Button>
         </Upload>
         <small style={{ color: "#aaa" }}>(Không bắt buộc)</small>
       </Form.Item>
 
       <Form.Item>
         <Button type="primary" htmlType="submit" loading={loading} block>
-          Submit
+          {isUpdate ? "Cập nhật" : "Tạo mới"}
         </Button>
       </Form.Item>
     </Form>

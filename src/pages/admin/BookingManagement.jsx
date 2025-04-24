@@ -6,6 +6,7 @@ import { fetchSellers } from "../../features/seller/sellerSlice"; // Import fetc
 import BookingForm from "../../components/BookingForm";
 import moment from 'moment';
 import { API_ENDPOINTS } from "../../configs/apiConfig"; // Import API endpoints
+import { toast } from 'react-toastify';
 
 const { Search } = Input;
 
@@ -52,18 +53,18 @@ const BookingManagement = () => {
       }
 
       if (result.errCode !== 0) {
-        message.error(result.errMessage || "Something went wrong");
+        toast.error(result.errMessage || "Có gì đó sai sai");
         return;
       }
-
-      message.success(editingBooking ? "Booking updated!" : "Booking created!");
+      
+      toast.success(editingBooking ? "Cập nhật thành công!" : "Tạo thành công!");
 
       await dispatch(fetchBookings());
       setIsModalOpen(false);
       setEditingBooking(null);
     } catch (error) {
       console.error(error);
-      message.error("Request failed.");
+      toast.error("Có gì đó sai sai");
     } finally {
       setSubmitLoading(false);
     }
@@ -72,9 +73,9 @@ const BookingManagement = () => {
   const handleDelete = async (id) => {
     try {
       await dispatch(deleteBooking(id)).unwrap();
-      message.success("Deleted booking!");
+      toast.success("Xoá thành công!");
     } catch {
-      message.error("Delete failed.");
+      toast.error("Xoá thất bại.");
     }
   };
 
@@ -101,49 +102,47 @@ const BookingManagement = () => {
   };
 
   const columns = [
-    { title: "Customer Name", dataIndex: "customerName" },
-    { title: "Phone", dataIndex: "phoneNumber" },
+    { title: "Tên khách hàng", dataIndex: "customerName" },
+    { title: "Số điện thoại", dataIndex: "phoneNumber" },
     {
-      title: "Service Request",
+      title: "Yêu cầu dịch vụ",
       dataIndex: "serviceRequest",
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (text) => (
         <span title={text}>
           {text?.length > 40 ? `${text.slice(0, 40)}...` : text || '-'}
         </span>
-      )
+      ),
     },
     {
-      title: "Guest Count",
+      title: "Số khách",
       dataIndex: "guestCount",
       width: 80,
       align: 'center',
     },
     {
-      title: "Room Count",
+      title: "Số phòng",
       dataIndex: "roomCount",
       width: 80,
       align: 'center',
     },
     {
-      title: "Check-in Date",
+      title: "Ngày nhận phòng",
       dataIndex: "checkInDate",
       render: (date) => moment(date).format("DD/MM/YYYY"),
     },
     {
-      title: "Check-out Date",
+      title: "Ngày trả phòng",
       dataIndex: "checkOutDate",
       render: (date) => moment(date).format("DD/MM/YYYY"),
     },
     {
-      title: "Price",
+      title: "Giá",
       dataIndex: "price",
       render: (price) => formatCurrency(price),
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       render: (_, record) => (
         <>
           <Button
@@ -154,7 +153,7 @@ const BookingManagement = () => {
             }}
             style={{ marginRight: 8 }}
           >
-            Edit
+            Chỉnh sửa
           </Button>
           <Button
             size="small"
@@ -162,18 +161,18 @@ const BookingManagement = () => {
             style={{ marginRight: 8 }}
             type="dashed"
           >
-            Detail
+            Chi tiết
           </Button>
-          <Popconfirm title="Are you sure?" onConfirm={() => handleDelete(record.id)}>
+          <Popconfirm title="Bạn có chắc chắn muốn xoá?" onConfirm={() => handleDelete(record.id)}>
             <Button size="small" danger>
-              Delete
+              Xoá
             </Button>
           </Popconfirm>
         </>
       ),
     },
     {
-      title: "Export",
+      title: "Xuất",
       render: (_, record) => (
         <>
           <Button
@@ -205,27 +204,27 @@ const BookingManagement = () => {
             setIsModalOpen(true);
           }}
         >
-          Add Booking
+          Thêm đặt phòng
         </Button>
 
-        {/* Search input */}
         <Search
-          placeholder="Search by Name, Phone, or Service"
+          placeholder="Tìm theo tên, số điện thoại, hoặc dịch vụ"
           onSearch={handleSearch}
-          onChange={(e) => handleSearch(e.target.value)} // Live search
-          style={{ width: 400 }} // Bạn có thể điều chỉnh chiều rộng của ô tìm kiếm tại đây
+          onChange={(e) => handleSearch(e.target.value)}
+          style={{ width: 400 }}
         />
       </div>
 
       <Table
-        dataSource={filteredBookings} // Render filteredBookings instead of bookings
+        dataSource={filteredBookings}
         columns={columns}
         rowKey="id"
         loading={loading}
       />
+
       <Modal
         open={!!viewingBooking}
-        title="Booking Details"
+        title="Chi tiết đặt phòng"
         onCancel={() => setViewingBooking(null)}
         width={700}
         destroyOnClose
@@ -233,69 +232,65 @@ const BookingManagement = () => {
         maskClosable={false}
         closable={false}
         footer={[
-        <Button key="close" onClick={() => setViewingBooking(null)}>
-          Close
-        </Button>,
-  ]}
->
-  {viewingBooking && (
-    <Descriptions column={1} bordered size="small">
-    <Descriptions.Item label="Customer Name">{viewingBooking.customerName}</Descriptions.Item>
-      <Descriptions.Item label="Phone">{viewingBooking.phoneNumber}</Descriptions.Item>
-
-      <Descriptions.Item label="Service Request" span={2}>
-        {viewingBooking.serviceRequest}
-      </Descriptions.Item>
-
-      <Descriptions.Item label="Guest Count">{viewingBooking.guestCount}</Descriptions.Item>
-      <Descriptions.Item label="Room Count">{viewingBooking.roomCount}</Descriptions.Item>
-
-      <Descriptions.Item label="Room Class">{viewingBooking.roomClass}</Descriptions.Item>
-      <Descriptions.Item label="Check-in Date">
-        {moment(viewingBooking.checkInDate).format("DD/MM/YYYY")}
-      </Descriptions.Item>
-      <Descriptions.Item label="Check-out Date">
-        {moment(viewingBooking.checkOutDate).format("DD/MM/YYYY")}
-      </Descriptions.Item>
-
-      <Descriptions.Item label="Price" span={2}>
-        {formatCurrency(viewingBooking.price)}
-      </Descriptions.Item>
-
-      <Descriptions.Item label="Note" span={2}>
-        {viewingBooking.note || "-"}
-      </Descriptions.Item>
-      <Descriptions.Item label="Seller Name">{viewingBooking.seller?.fullName}</Descriptions.Item>
-  <Descriptions.Item label="Seller Phone">{viewingBooking.seller?.phoneNumber}</Descriptions.Item>
-  <Descriptions.Item label="Seller Email" span={2}>{viewingBooking.seller?.email}</Descriptions.Item>
-  {viewingBooking.seller?.qrCodeUrl && (
-    <Descriptions.Item label="QR Code" span={2}>
-      <img
-        src={viewingBooking.seller.qrCodeUrl}
-        alt="QR Code"
-        style={{ maxWidth: "120px", border: "1px solid #eee", padding: 4 }}
-      />
-    </Descriptions.Item>
-  )}
-
-    </Descriptions>
-  )}
-</Modal>
+          <Button key="close" onClick={() => setViewingBooking(null)}>
+            Đóng
+          </Button>,
+        ]}
+      >
+        {viewingBooking && (
+          <Descriptions column={1} bordered size="small">
+            <Descriptions.Item label="Tên khách hàng">{viewingBooking.customerName}</Descriptions.Item>
+            <Descriptions.Item label="Số điện thoại">{viewingBooking.phoneNumber}</Descriptions.Item>
+            <Descriptions.Item label="Yêu cầu dịch vụ" span={2}>
+              {viewingBooking.serviceRequest}
+            </Descriptions.Item>
+            <Descriptions.Item label="Số khách">{viewingBooking.guestCount}</Descriptions.Item>
+            <Descriptions.Item label="Số phòng">{viewingBooking.roomCount}</Descriptions.Item>
+            <Descriptions.Item label="Hạng phòng">{viewingBooking.roomClass}</Descriptions.Item>
+            <Descriptions.Item label="Ngày nhận phòng">
+              {moment(viewingBooking.checkInDate).format("DD/MM/YYYY")}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ngày trả phòng">
+              {moment(viewingBooking.checkOutDate).format("DD/MM/YYYY")}
+            </Descriptions.Item>
+            <Descriptions.Item label="Giá" span={2}>
+              {formatCurrency(viewingBooking.price)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ghi chú" span={2}>
+              {viewingBooking.note || "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tên người bán">{viewingBooking.seller?.fullName}</Descriptions.Item>
+            <Descriptions.Item label="SĐT người bán">{viewingBooking.seller?.phoneNumber}</Descriptions.Item>
+            <Descriptions.Item label="Email người bán" span={2}>{viewingBooking.seller?.email}</Descriptions.Item>
+            {viewingBooking.seller?.qrCodeUrl && (
+              <Descriptions.Item label="Mã QR" span={2}>
+                <img
+                  src={viewingBooking.seller.qrCodeUrl}
+                  alt="QR Code"
+                  style={{ maxWidth: "120px", border: "1px solid #eee", padding: 4 }}
+                />
+              </Descriptions.Item>
+            )}
+          </Descriptions>
+        )}
+      </Modal>
 
       <Modal
         open={isModalOpen}
-        title={editingBooking ? "Edit Booking" : "Create Booking"}
+        title={editingBooking ? "Chỉnh sửa đặt phòng" : "Tạo mới đặt phòng"}
         onCancel={() => {
           setIsModalOpen(false);
           setEditingBooking(null);
         }}
         footer={null}
       >
-              <BookingForm onFinish={handleCreateOrUpdate} initialValues={editingBooking || {}} loading={submitLoading} />
-
+        <BookingForm
+          onFinish={handleCreateOrUpdate}
+          initialValues={editingBooking || {}}
+          loading={submitLoading}
+        />
       </Modal>
     </div>
   );
 };
-
 export default BookingManagement;

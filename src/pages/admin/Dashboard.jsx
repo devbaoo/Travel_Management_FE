@@ -1,9 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Row, Statistic, Typography, Spin } from "antd";
-import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip as RechartsTooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../configs/apiConfig";
-// import AnimatedPage from "../../components/AnimationPage";
 
 const { Title } = Typography;
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA00FF', '#00B8D9'];
@@ -34,17 +44,18 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={3}>Booking Dashboard</Title>
+      <Title level={3}>DashBoard</Title>
+
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={12}>
           <Card>
-            <Statistic title="Total Bookings" value={totalBookings} />
+            <Statistic title="Tổng số lượt đặt phòng" value={totalBookings} />
           </Card>
         </Col>
         <Col span={12}>
           <Card>
             <Statistic
-              title="Total Revenue"
+              title="Tổng doanh thu"
               value={totalRevenue}
               precision={0}
               valueStyle={{ color: "#3f8600" }}
@@ -56,7 +67,7 @@ const Dashboard = () => {
 
       <Row gutter={24}>
         <Col span={14}>
-          <Card title="Bookings in the Last 7 Days">
+          <Card title="Lượt đặt trong 7 ngày qua">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={bookingsByDay}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -69,7 +80,7 @@ const Dashboard = () => {
           </Card>
         </Col>
         <Col span={10}>
-          <Card title="Bookings by Seller">
+          <Card title="Lượt đặt theo người bán">
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -93,7 +104,6 @@ const Dashboard = () => {
       </Row>
     </div>
   );
-  
 };
 
 export default Dashboard;

@@ -1,16 +1,17 @@
-import { Modal, Form, Input, Upload, Button, message } from "antd";
+import { Modal, Form, Input, Upload, Button } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../configs/apiConfig";
 import { useAuth } from "../utils/AuthContext";
-import { useNavigate } from "react-router-dom"; // 👈 thêm để điều hướng
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify"; // ✅ Sử dụng toast
 
 const UpdateProfile = ({ visible, onClose }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const { user, login, logout } = useAuth(); // 👈 thêm logout từ context
-  const navigate = useNavigate(); // 👈 dùng navigate thay vì window.location
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (visible && user) {
@@ -48,19 +49,17 @@ const UpdateProfile = ({ visible, onClose }) => {
       const res = await axios.put(API_ENDPOINTS.UPDATE_SELLER(user.id), formData);
 
       if (res.data.errCode === 0) {
-        message.success("Cập nhật thành công, vui lòng đăng nhập lại");
+        toast.success("Cập nhật thành công, vui lòng đăng nhập lại");
 
-        // 👇 Sau 1.5s tự động đăng xuất và điều hướng về login
         setTimeout(() => {
-          logout(); // Xoá token, user từ context
+          logout();
           navigate("/login");
         }, 1500);
       } else {
-        message.error(res.data.errMessage || "Cập nhật thất bại");
+        toast.error(res.data.errMessage || "Cập nhật thất bại");
       }
     } catch (err) {
-      console.error("Error updating profile:", err);
-      message.error("Đã xảy ra lỗi khi cập nhật");
+      toast.error("Đã xảy ra lỗi khi cập nhật");
     } finally {
       setLoading(false);
     }
