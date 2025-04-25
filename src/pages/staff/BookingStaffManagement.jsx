@@ -187,14 +187,14 @@ const BookingStaffManagement = () => {
             type="default"
             onClick={() => handleExport("pdf", record.id)}
           >
-            PDF
+          PDF
           </Button>
           <Button
             size="small"
             type="default"
             onClick={() => handleExport("txt", record.id)}
           >
-            TXT
+          TXT
           </Button>
         </div>
       ),
