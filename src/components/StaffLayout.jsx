@@ -71,6 +71,8 @@ const StaffLayout = () => {
         collapsible
         collapsed={collapsed}
         onCollapse={(collapsed) => setCollapsed(collapsed)}
+        breakpoint="md" // Thêm breakpoint để tự động thu gọn trên màn hình nhỏ
+        collapsedWidth={80} // Chiều rộng khi thu gọn
         style={{
           position: "fixed",
           left: 0,
@@ -99,7 +101,7 @@ const StaffLayout = () => {
         <Header
           style={{
             background: "#fff",
-            padding: "0 24px",
+            padding: "0 16px", // Giảm padding để phù hợp với màn hình nhỏ
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -109,7 +111,7 @@ const StaffLayout = () => {
             style={{
               fontFamily: "'Playfair Display', serif",
               fontWeight: "700",
-              fontSize: "32px",
+              fontSize: "24px", // Giảm kích thước font trên màn hình nhỏ
               color: "#d49f3a",
               margin: 0,
               letterSpacing: "1px",
@@ -128,7 +130,7 @@ const StaffLayout = () => {
         <Content
           style={{
             margin: "24px 16px",
-            padding: 24,
+            padding: 16, // Giảm padding để phù hợp với màn hình nhỏ
             minHeight: "calc(100vh - 64px)",
             backgroundColor: "#fff",
             transition: "all 0.3s",

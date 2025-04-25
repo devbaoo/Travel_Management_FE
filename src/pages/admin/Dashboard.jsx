@@ -46,15 +46,18 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={3}>DashBoard</Title>
+      <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
+        DashBoard
+      </Title>
 
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={12}>
+      {/* Row for statistics */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
           <Card>
             <Statistic title="Tổng số lượt đặt phòng" value={totalBookings} />
           </Card>
         </Col>
-        <Col span={12}>
+        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
           <Card>
             <Statistic
               title="Tổng doanh thu"
@@ -65,10 +68,7 @@ const Dashboard = () => {
             />
           </Card>
         </Col>
-      </Row>
-
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={12}>
+        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
           <Card>
             <Statistic
               title="Giá nhập"
@@ -79,7 +79,7 @@ const Dashboard = () => {
             />
           </Card>
         </Col>
-        <Col span={12}>
+        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
           <Card>
             <Statistic
               title="Lợi nhuận"
@@ -92,8 +92,9 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      <Row gutter={24}>
-        <Col span={14}>
+      {/* Row for charts */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={14}>
           <Card title="Lượt đặt trong 7 ngày qua">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={bookingsByDay}>
@@ -106,7 +107,7 @@ const Dashboard = () => {
             </ResponsiveContainer>
           </Card>
         </Col>
-        <Col span={10}>
+        <Col xs={24} md={10}>
           <Card title="Lượt đặt theo người bán">
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Modal, Popconfirm, Input } from "antd";
+import { Table, Button, Modal, Popconfirm, Input, Row, Col } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchSellers,
@@ -113,33 +113,40 @@ const SellerManagement = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: 16 }}>
-        <Button
-          type="primary"
-          style={{ marginRight: 16 }}
-          onClick={() => {
-            setEditingSeller(null);
-            setIsModalOpen(true);
-          }}
-        >
-          Thêm người bán
-        </Button>
+      {/* Row for actions */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+        <Col xs={24} sm={12} md={8}>
+          <Button
+            type="primary"
+            style={{ width: "100%" }}
+            onClick={() => {
+              setEditingSeller(null);
+              setIsModalOpen(true);
+            }}
+          >
+            Thêm người bán
+          </Button>
+        </Col>
+        <Col xs={24} sm={12} md={16}>
+          <Search
+            placeholder="Tìm theo tên, số điện thoại hoặc email"
+            onSearch={handleSearch}
+            onChange={(e) => handleSearch(e.target.value)}
+            style={{ width: "100%" }}
+          />
+        </Col>
+      </Row>
 
-        <Search
-          placeholder="Tìm theo tên, số điện thoại hoặc email"
-          onSearch={handleSearch}
-          onChange={(e) => handleSearch(e.target.value)}
-          style={{ width: 400 }}
-        />
-      </div>
-
+      {/* Table */}
       <Table
         dataSource={filteredSellers}
         columns={columns}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 1000 }} // Cho phép cuộn ngang trên màn hình nhỏ
       />
 
+      {/* Modal for creating or editing seller */}
       <Modal
         open={isModalOpen}
         title={editingSeller ? "Chỉnh sửa người bán" : "Thêm người bán"}
