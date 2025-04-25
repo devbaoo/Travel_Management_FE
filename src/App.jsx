@@ -5,12 +5,21 @@ import StaffRoutes from './pages/staff/StaffRoute';
 import RequireAuth from './components/RequireAuth';
 import NotFound from './pages/NotFound'; // Import the NotFound page
 
+
+
 const AppRoutes = () => {
+
+  const token = localStorage.getItem('token');
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/not-found" element={<NotFound />} />
-      <Route path="/" element={<LoginPage />} />
+      <Route path="/" element={!user? <LoginPage/> : user.role === "admin" ? <AdminRoutes/> : <StaffRoutes/>} />
+
 
       {/* Admin Routes, protected for admin role */}
       <Route element={<RequireAuth role="admin" />}>
