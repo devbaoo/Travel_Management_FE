@@ -18,7 +18,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/not-found" element={<NotFound />} />
-      <Route path="/" element={!user? <LoginPage/> : user.role === "admin" ? <AdminRoutes/> : <StaffRoutes/>} />
+      <Route path="/" element={!user ? <LoginPage/> : user.role === "admin" ? <AdminRoutes/> : <StaffRoutes/>} />
 
 
       {/* Admin Routes, protected for admin role */}
