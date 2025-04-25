@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import RequireAuth from "../../components/RequireAuth";
 import StaffLayout from "../../components/StaffLayout";
 import NotFound from "../NotFound";
-import BookingStaffManagement from "./BookingStaffmanagement";
+import BookingStaffManagement from "./BookingStaffManagement";
 import DashboardStaff from "./DashboardStaff";
 
 const StaffRoutes = () => {
