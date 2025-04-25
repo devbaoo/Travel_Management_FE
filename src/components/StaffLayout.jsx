@@ -21,21 +21,14 @@ const StaffLayout = () => {
     useEffect(() => {
       const handleResize = () => {
         if (window.innerWidth <= 576) {
-          setFontSize("18px"); // Kích thước font cho màn hình nhỏ
-        } else if (window.innerWidth <= 768) {
-          setFontSize("20px"); // Kích thước font cho màn hình tablet
+          setFontSize("18px");
+          setFontSize("20px");
         } else {
-          setFontSize("24px"); // Kích thước font cho màn hình lớn
+          setFontSize("24px");
         }
       };
-
-      // Gọi hàm khi component được mount
       handleResize();
-
-      // Lắng nghe sự kiện thay đổi kích thước màn hình
       window.addEventListener("resize", handleResize);
-
-      // Dọn dẹp sự kiện khi component bị unmount
       return () => {
         window.removeEventListener("resize", handleResize);
       };
@@ -94,8 +87,8 @@ const StaffLayout = () => {
         collapsible
         collapsed={collapsed}
         onCollapse={(collapsed) => setCollapsed(collapsed)}
-        breakpoint="md" // Thêm breakpoint để tự động thu gọn trên màn hình nhỏ
-        collapsedWidth={80} // Chiều rộng khi thu gọn
+        breakpoint="md"
+        collapsedWidth={80}
         style={{
           position: "fixed",
           left: 0,
@@ -124,7 +117,7 @@ const StaffLayout = () => {
         <Header
           style={{
             background: "#fff",
-            padding: "0 16px", // Giảm padding để phù hợp với màn hình nhỏ
+            padding: "0 16px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -134,7 +127,7 @@ const StaffLayout = () => {
             style={{
               fontFamily: "'Playfair Display', serif",
               fontWeight: "700",
-              fontSize: fontSize, // Giảm kích thước font trên màn hình nhỏ
+              fontSize: fontSize,
               color: "#d49f3a",
               margin: 0,
               letterSpacing: "1px",
@@ -153,7 +146,7 @@ const StaffLayout = () => {
         <Content
           style={{
             margin: "24px 16px",
-            padding: 16, // Giảm padding để phù hợp với màn hình nhỏ
+            padding: 16,
             minHeight: "calc(100vh - 64px)",
             backgroundColor: "#fff",
             transition: "all 0.3s",

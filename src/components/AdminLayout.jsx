@@ -105,8 +105,8 @@ const AdminLayout = () => {
         collapsible
         collapsed={collapsed}
         onCollapse={(collapsed) => setCollapsed(collapsed)}
-        breakpoint="md" // Tự động thu gọn trên màn hình nhỏ hơn kích thước md (≥ 768px)
-        collapsedWidth={80} // Chiều rộng khi thu gọn
+        breakpoint="md"
+        collapsedWidth={80}
         style={{
           position: "fixed",
           left: 0,
@@ -139,7 +139,7 @@ const AdminLayout = () => {
         <Header
           style={{
             background: "#fff",
-            padding: "0 16px", // Giảm padding để phù hợp với màn hình nhỏ
+            padding: "0 16px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -149,7 +149,7 @@ const AdminLayout = () => {
             style={{
               fontFamily: "'Playfair Display', serif",
               fontWeight: "700",
-              fontSize: fontSize, // Áp dụng kích thước font động
+              fontSize: fontSize,
               color: "#d49f3a",
               margin: 0,
               letterSpacing: "1px",
@@ -168,7 +168,7 @@ const AdminLayout = () => {
         <Content
           style={{
             margin: "24px 16px",
-            padding: 16, // Giảm padding để phù hợp với màn hình nhỏ
+            padding: 16, 
             minHeight: "calc(100vh - 64px)",
             backgroundColor: "#fff",
             transition: "all 0.3s",
