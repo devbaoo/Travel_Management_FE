@@ -1,7 +1,7 @@
 import { Layout, Menu, Dropdown, Avatar, Space } from "antd";
 import { UserOutlined, DashboardOutlined, ScheduleOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../utils/AuthContext";
 import ChangePassword from "./ChangePassword";
 import UpdateProfile from "./UpdateProfile";
@@ -16,7 +16,30 @@ const StaffLayout = () => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { user, logout } = useAuth();
+  const [fontSize, setFontSize] = useState("24px");
 
+    useEffect(() => {
+      const handleResize = () => {
+        if (window.innerWidth <= 576) {
+          setFontSize("18px"); // Kích thước font cho màn hình nhỏ
+        } else if (window.innerWidth <= 768) {
+          setFontSize("20px"); // Kích thước font cho màn hình tablet
+        } else {
+          setFontSize("24px"); // Kích thước font cho màn hình lớn
+        }
+      };
+
+      // Gọi hàm khi component được mount
+      handleResize();
+
+      // Lắng nghe sự kiện thay đổi kích thước màn hình
+      window.addEventListener("resize", handleResize);
+
+      // Dọn dẹp sự kiện khi component bị unmount
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    }, []);
   const handleClick = (e) => {
     if (e.key === "/staff/logout") {
       logout();
@@ -111,7 +134,7 @@ const StaffLayout = () => {
             style={{
               fontFamily: "'Playfair Display', serif",
               fontWeight: "700",
-              fontSize: "24px", // Giảm kích thước font trên màn hình nhỏ
+              fontSize: fontSize, // Giảm kích thước font trên màn hình nhỏ
               color: "#d49f3a",
               margin: 0,
               letterSpacing: "1px",
