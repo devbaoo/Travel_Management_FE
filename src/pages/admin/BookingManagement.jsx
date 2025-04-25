@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { Table, Button, Modal, Popconfirm, message, Input, DatePicker,Descriptions} from 'antd';
+import { Table, Button, Modal, Popconfirm, message, Input, DatePicker,Descriptions, Row, Col } from 'antd';
 import { fetchBookings, createBooking, deleteBooking, updateBooking , exportBookingPdf, exportBookingTxt} from "../../features/booking/bookingSlice";
 import { fetchSellers } from "../../features/seller/sellerSlice"; // Import fetchSellers
 import BookingForm from "../../components/BookingForm";
@@ -202,33 +202,40 @@ const BookingManagement = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: 16 }}>
-        <Button
-          type="primary"
-          style={{ marginRight: 16 }}
-          onClick={() => {
-            setEditingBooking(null);
-            setIsModalOpen(true);
-          }}
-        >
-          Thêm đặt phòng
-        </Button>
+      {/* Row for actions */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+        <Col xs={24} sm={12} md={8}>
+          <Button
+            type="primary"
+            style={{ width: "100%" }}
+            onClick={() => {
+              setEditingBooking(null);
+              setIsModalOpen(true);
+            }}
+          >
+            Thêm đặt phòng
+          </Button>
+        </Col>
+        <Col xs={24} sm={12} md={16}>
+          <Search
+            placeholder="Tìm theo tên, số điện thoại, hoặc dịch vụ"
+            onSearch={handleSearch}
+            onChange={(e) => handleSearch(e.target.value)}
+            style={{ width: "100%" }}
+          />
+        </Col>
+      </Row>
 
-        <Search
-          placeholder="Tìm theo tên, số điện thoại, hoặc dịch vụ"
-          onSearch={handleSearch}
-          onChange={(e) => handleSearch(e.target.value)}
-          style={{ width: 400 }}
-        />
-      </div>
-
+      {/* Table */}
       <Table
         dataSource={filteredBookings}
         columns={columns}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 1000 }} // Cho phép cuộn ngang trên màn hình nhỏ
       />
 
+      {/* Modal for viewing booking details */}
       <Modal
         open={!!viewingBooking}
         title="Chi tiết đặt phòng"
@@ -282,6 +289,7 @@ const BookingManagement = () => {
         )}
       </Modal>
 
+      {/* Modal for creating or editing booking */}
       <Modal
         open={isModalOpen}
         title={editingBooking ? "Chỉnh sửa đặt phòng" : "Tạo mới đặt phòng"}

@@ -4,7 +4,9 @@ import {
   Button,
   DatePicker,
   InputNumber,
-  Select
+  Select,
+  Row,
+  Col
 } from 'antd';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -98,155 +100,191 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
       layout="vertical"
       onFinish={handleSubmit}
     >
-      <Form.Item
-        name="customerName"
-        label="Tên khách hàng"
-        rules={[{ required: true, message: 'Vui lòng nhập tên khách hàng' }]}
-      >
-        <Input placeholder="Nguyễn Văn A" />
-      </Form.Item>
-
-      <Form.Item
-        name="phoneNumber"
-        label="Số điện thoại"
-        rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
-      >
-        <Input placeholder="0123456789" />
-      </Form.Item>
-
-      <Form.Item
-        name="serviceRequest"
-        label="Yêu cầu dịch vụ"
-        rules={[
-          { required: true, message: 'Vui lòng nhập yêu cầu dịch vụ' },
-          { max: 255, message: 'Tối đa 255 ký tự' },
-        ]}
-      >
-        <Input.TextArea style={{ minHeight: 100 }} placeholder="Ví dụ: Dọn phòng, giặt ủi, v.v." />
-      </Form.Item>
-
-      <Form.Item
-        name="guestCount"
-        label="Số khách"
-        rules={[{ required: true, message: 'Vui lòng nhập số khách' }]}
-      >
-        <InputNumber min={1} style={{ width: '100%' }} placeholder="1" />
-      </Form.Item>
-
-      <Form.Item
-        name="roomCount"
-        label="Số phòng"
-        rules={[{ required: true, message: 'Vui lòng nhập số phòng' }]}
-      >
-        <InputNumber min={1} style={{ width: '100%' }} placeholder="1" />
-      </Form.Item>
-
-      <Form.Item
-        name="roomClass"
-        label="Hạng phòng"
-        rules={[{ required: true, message: 'Vui lòng nhập hạng phòng' }]}
-      >
-        <Input/>
-      </Form.Item>
-
-      <Form.Item
-        name="checkInDate"
-        label="Ngày & giờ nhận phòng"
-        rules={[{ required: true, message: 'Vui lòng chọn ngày & giờ nhận phòng' }]}
-      >
-        <DatePicker
-          style={{ width: '100%' }}
-          format="DD/MM/YYYY HH:mm"
-          showTime={{ format: 'HH:mm', minuteStep: 15 }}
-          disabledDate={d => d && d < moment().startOf('day')}
-        />
-      </Form.Item>
-
-      <Form.Item
-        name="checkOutDate"
-        label="Ngày & giờ trả phòng"
-        rules={[
-          { required: true, message: 'Vui lòng chọn ngày & giờ trả phòng' },
-          { validator: validateCheckOutDate },
-        ]}
-      >
-        <DatePicker
-          style={{ width: '100%' }}
-          format="DD/MM/YYYY HH:mm"
-          showTime={{ format: 'HH:mm', minuteStep: 15 }}
-          disabledDate={d => d && d < moment().startOf('day')}
-        />
-      </Form.Item>
-
-
-      <Form.Item
-        name="price"
-        label="Giá"
-        rules={[{ required: true, message: 'Vui lòng nhập giá' }]}
-      >
-        <InputNumber
-          min={0}
-          step={1000}
-          value={price}
-          onChange={handlePriceChange}
-          formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-          parser={v => v.replace(/\./g, '')}
-          style={{ width: '100%' }}
-          placeholder="Ví dụ: 500000"
-        />
-      </Form.Item>
-      <Form.Item
-        name="originalPrice"
-        label="Giá nhập"
-        rules={[
-          { required: true, message: 'Vui lòng nhập giá' },
-          { validator: validateOriginalPrice },
-        ]}
-      >
-        <InputNumber
-          min={0}
-          step={1000}
-          value={originalPrice}
-          onChange={handleOriginalPriceChange}
-          formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-          parser={v => v.replace(/\./g, '')}
-          style={{ width: '100%' }}
-          placeholder="Ví dụ: 500000"
-        />
-      </Form.Item>
-      <Form.Item name="note" label="Ghi chú">
-        <Input.TextArea placeholder="Thêm ghi chú (nếu có)" />
-      </Form.Item>
-
-      {/* Remove the "Người bán" field for staff */}
-      {!isStaff() && (
-        <Form.Item
-          name="sellerId"
-          label="Người bán"
-          rules={[{ required: true, message: 'Vui lòng chọn người bán' }]}
-        >
-          <Select
-            showSearch
-            placeholder="Chọn người bán"
-            optionFilterProp="children"
-            filterOption={(input, option) =>
-              option.children.toLowerCase().includes(input.toLowerCase())
-            }
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            name="customerName"
+            label="Tên khách hàng"
+            rules={[{ required: true, message: 'Vui lòng nhập tên khách hàng' }]}
           >
-            {sellers.map(s => (
-              <Select.Option key={s.id} value={s.id}>
-                {s.fullName}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
+            <Input placeholder="Nguyễn Văn A" />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            name="phoneNumber"
+            label="Số điện thoại"
+            rules={[
+              { required: true, message: 'Vui lòng nhập số điện thoại' },
+              { pattern: /^[0-9]{10}$/, message: 'Số điện thoại phải có 10 chữ số và không chứa ký tự khác' }
+            ]}
+          >
+            <Input
+              placeholder="0123456789"
+              maxLength={10}
+              onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')} // Xóa ký tự không phải số
+            />
+          </Form.Item>
+
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24}>
+          <Form.Item
+            name="serviceRequest"
+            label="Yêu cầu dịch vụ"
+            rules={[
+              { required: true, message: 'Vui lòng nhập yêu cầu dịch vụ' },
+              { max: 255, message: 'Tối đa 255 ký tự' },
+            ]}
+          >
+            <Input.TextArea style={{ minHeight: 100 }} placeholder="Ví dụ: Dọn phòng, giặt ủi, v.v." />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            name="guestCount"
+            label="Số khách"
+            rules={[{ required: true, message: 'Vui lòng nhập số khách' }]}
+          >
+            <InputNumber min={1} style={{ width: '100%' }} placeholder="1" />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            name="roomCount"
+            label="Số phòng"
+            rules={[{ required: true, message: 'Vui lòng nhập số phòng' }]}
+          >
+            <InputNumber min={1} style={{ width: '100%' }} placeholder="1" />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            name="checkInDate"
+            label="Ngày & giờ nhận phòng"
+            rules={[{ required: true, message: 'Vui lòng chọn ngày & giờ nhận phòng' }]}
+          >
+            <DatePicker
+              style={{ width: '100%' }}
+              format="DD/MM/YYYY HH:mm"
+              showTime={{ format: 'HH:mm', minuteStep: 15 }}
+              disabledDate={d => d && d < moment().startOf('day')}
+            />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            name="checkOutDate"
+            label="Ngày & giờ trả phòng"
+            rules={[
+              { required: true, message: 'Vui lòng chọn ngày & giờ trả phòng' },
+              { validator: validateCheckOutDate },
+            ]}
+          >
+            <DatePicker
+              style={{ width: '100%' }}
+              format="DD/MM/YYYY HH:mm"
+              showTime={{ format: 'HH:mm', minuteStep: 15 }}
+              disabledDate={d => d && d < moment().startOf('day')}
+            />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            name="price"
+            label="Giá"
+            rules={[{ required: true, message: 'Vui lòng nhập giá' }]}
+          >
+            <InputNumber
+              min={0}
+              step={1000}
+              value={price}
+              onChange={handlePriceChange}
+              formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+              parser={v => v.replace(/\./g, '')}
+              style={{ width: '100%' }}
+              placeholder="Ví dụ: 500000"
+            />
+          </Form.Item>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Form.Item
+            name="originalPrice"
+            label="Giá nhập"
+            rules={[
+              { required: true, message: 'Vui lòng nhập giá' },
+              { validator: validateOriginalPrice },
+            ]}
+          >
+            <InputNumber
+              min={0}
+              step={1000}
+              value={originalPrice}
+              onChange={handleOriginalPriceChange}
+              formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+              parser={v => v.replace(/\./g, '')}
+              style={{ width: '100%' }}
+              placeholder="Ví dụ: 500000"
+            />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24}>
+          <Form.Item name="note" label="Ghi chú">
+            <Input.TextArea placeholder="Thêm ghi chú (nếu có)" />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      {!isStaff() && (
+        <Row gutter={[16, 16]}>
+          <Col xs={24}>
+            <Form.Item
+              name="sellerId"
+              label="Người bán"
+              rules={[{ required: true, message: 'Vui lòng chọn người bán' }]}
+            >
+              <Select
+                showSearch
+                placeholder="Chọn người bán"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                {sellers.map(s => (
+                  <Select.Option key={s.id} value={s.id}>
+                    {s.fullName}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
       )}
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading} block>
-          Lưu thông tin
-        </Button>
-      </Form.Item>
+      <Row>
+        <Col xs={24}>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading} block>
+              Lưu thông tin
+            </Button>
+          </Form.Item>
+        </Col>
+      </Row>
     </Form>
   );
 };

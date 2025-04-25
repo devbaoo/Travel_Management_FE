@@ -44,42 +44,45 @@ const DashboardStaff = () => {
     bookingsByDay = [],
   } = dashboardData?.data || {};
 
+  // Kiểm tra và thay thế null bằng 0
+  const safeTotalRevenue = totalRevenue === null ? 0 : totalRevenue;
+  const safeTotalOriginalPrice = totalOriginalPrice === null ? 0 : totalOriginalPrice;
   return (
     <div style={{ padding: 24 }}>
-      <Title level={3}>DashBoard</Title>
+      <Title level={3} style={{ textAlign: "center", marginBottom: 24 }}>
+        DashBoard
+      </Title>
 
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={12}>
+      {/* Row for statistics */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
           <Card>
             <Statistic title="Tổng số lượt đặt phòng" value={totalBookings} />
           </Card>
         </Col>
-        <Col span={12}>
+        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
           <Card>
             <Statistic
               title="Tổng doanh thu"
-              value={totalRevenue}
+              value={safeTotalRevenue}
               precision={0}
               valueStyle={{ color: "#3f8600" }}
               suffix="VND"
             />
           </Card>
         </Col>
-      </Row>
-
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={12}>
+        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
           <Card>
             <Statistic
               title="Giá nhập"
-              value={totalOriginalPrice}
+              value={safeTotalOriginalPrice}
               precision={0}
               valueStyle={{ color: "#cf1322" }}
               suffix="VND"
             />
           </Card>
         </Col>
-        <Col span={12}>
+        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
           <Card>
             <Statistic
               title="Lợi nhuận"
@@ -92,8 +95,9 @@ const DashboardStaff = () => {
         </Col>
       </Row>
 
-      <Row gutter={24}>
-        <Col span={24}>
+      {/* Row for chart */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24}>
           <Card title="Lượt đặt trong 7 ngày qua">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={bookingsByDay}>
