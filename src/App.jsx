@@ -10,6 +10,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/not-found" element={<NotFound />} />
+      <Route path="/" element={<LoginPage />} />
 
       {/* Admin Routes, protected for admin role */}
       <Route element={<RequireAuth role="admin" />}>
@@ -19,7 +20,7 @@ const AppRoutes = () => {
       <Route element={<RequireAuth role="staff" />}>
         <Route path="/staff/*" element={<StaffRoutes />} />
       </Route>
-      
+
       <Route path="*" element={<NotFound />} />
 
     </Routes>
