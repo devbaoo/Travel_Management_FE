@@ -5,7 +5,13 @@ export const fetchBookings = createAsyncThunk('booking/fetchAll', async () => {
   const response = await bookingService.getAllBookings();
   return response;
 });
-
+export const fetchBookingsBySeller = createAsyncThunk(
+  'booking/fetchBySeller',
+  async (id) => {
+    const response = await bookingService.getAllBookingsBySeller(id);
+    return response;
+  }
+);
 export const createBooking = createAsyncThunk('booking/create', async (formData) => {
   const response = await bookingService.createBooking(formData);
   return response;
@@ -51,6 +57,18 @@ const bookingSlice = createSlice({
         state.bookings = action.payload.data || [];
       })
       .addCase(fetchBookings.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      .addCase(fetchBookingsBySeller.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBookingsBySeller.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bookings = action.payload.data || [];
+      })
+      .addCase(fetchBookingsBySeller.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })

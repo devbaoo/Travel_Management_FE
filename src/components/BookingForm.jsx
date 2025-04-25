@@ -11,12 +11,16 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSellers } from "../features/seller/sellerSlice";
 import { toast } from 'react-toastify';
+import { i } from 'framer-motion/client';
+import { useAuth } from '../utils/AuthContext'; // Import the AuthContext
 
 const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
   const { sellers } = useSelector(state => state.seller);
   const [price, setPrice] = useState(0);
+  const [originalPrice, setOriginalPrice] = useState(0);
+  const { user, isStaff } = useAuth(); // Get user and role-checking function
 
   useEffect(() => {
     dispatch(fetchSellers());
@@ -34,6 +38,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
         note: initialValues.note,
         sellerId: initialValues.sellerId,
         price: initialValues.price,
+        originalPrice: initialValues.originalPrice,
         checkInDate: moment(initialValues.checkInDate),
         checkOutDate: moment(initialValues.checkOutDate),
       });
@@ -44,12 +49,27 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
         guestCount: 1,
         roomCount: 1,
         price: 0,
+        originalPrice: 0,
       });
       setPrice(0);
     }
   }, [initialValues, form]);
 
+  useEffect(() => {
+    if (isStaff()) {
+      form.setFieldsValue({ sellerId: user.id }); // Automatically set sellerId for staff
+    }
+  }, [isStaff, user, form]);
+
   const handlePriceChange = val => setPrice(val);
+  const handleOriginalPriceChange = val => setOriginalPrice(val);
+
+  const validateOriginalPrice = (_, value) => {
+    if (value > price) {
+      return Promise.reject('Giá nhập không được lớn hơn giá bán');
+    }
+    return Promise.resolve();
+  };
 
   const validateCheckOutDate = (_, value) => {
     const checkIn = form.getFieldValue('checkInDate');
@@ -61,6 +81,10 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
 
   const handleSubmit = async (values) => {
     try {
+      // Ensure sellerId is set to the staff's ID if the user is a staff member
+      if (isStaff()) {
+        values.sellerId = user.id;
+      }
       await onFinish(values);
       form.resetFields();
     } catch (error) {
@@ -154,6 +178,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
         />
       </Form.Item>
 
+
       <Form.Item
         name="price"
         label="Giá"
@@ -170,31 +195,52 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
           placeholder="Ví dụ: 500000"
         />
       </Form.Item>
-
+      <Form.Item
+        name="originalPrice"
+        label="Giá nhập"
+        rules={[
+          { required: true, message: 'Vui lòng nhập giá' },
+          { validator: validateOriginalPrice },
+        ]}
+      >
+        <InputNumber
+          min={0}
+          step={1000}
+          value={originalPrice}
+          onChange={handleOriginalPriceChange}
+          formatter={v => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+          parser={v => v.replace(/\./g, '')}
+          style={{ width: '100%' }}
+          placeholder="Ví dụ: 500000"
+        />
+      </Form.Item>
       <Form.Item name="note" label="Ghi chú">
         <Input.TextArea placeholder="Thêm ghi chú (nếu có)" />
       </Form.Item>
 
-      <Form.Item
-        name="sellerId"
-        label="Người bán"
-        rules={[{ required: true, message: 'Vui lòng chọn người bán' }]}
-      >
-        <Select
-          showSearch
-          placeholder="Chọn người bán"
-          optionFilterProp="children"
-          filterOption={(input, option) =>
-            option.children.toLowerCase().includes(input.toLowerCase())
-          }
+      {/* Remove the "Người bán" field for staff */}
+      {!isStaff() && (
+        <Form.Item
+          name="sellerId"
+          label="Người bán"
+          rules={[{ required: true, message: 'Vui lòng chọn người bán' }]}
         >
-          {sellers.map(s => (
-            <Select.Option key={s.id} value={s.id}>
-              {s.fullName}
-            </Select.Option>
-          ))}
-        </Select>
-      </Form.Item>
+          <Select
+            showSearch
+            placeholder="Chọn người bán"
+            optionFilterProp="children"
+            filterOption={(input, option) =>
+              option.children.toLowerCase().includes(input.toLowerCase())
+            }
+          >
+            {sellers.map(s => (
+              <Select.Option key={s.id} value={s.id}>
+                {s.fullName}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      )}
 
       <Form.Item>
         <Button type="primary" htmlType="submit" loading={loading} block>

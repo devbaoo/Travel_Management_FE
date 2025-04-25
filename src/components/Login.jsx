@@ -26,10 +26,16 @@ const LoginPage = () => {
 
       if (res.data.errCode === 0) {
         const { token, seller } = res.data.data;
-        login(seller, token);
+        login(seller, token); // Lưu thông tin user và token vào AuthContext và localStorage
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         toast.success('Đăng nhập thành công!');
-        navigate('/admin/dashboard');
+        localStorage.setItem('token', token);  // Lưu token vào localStorage
+        localStorage.setItem('user', JSON.stringify(seller));  // Lưu thông tin user vào localStorage
+        if (seller.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (seller.role === 'staff') {
+          navigate('/staff/dashboard');
+        }
       } else {
         toast.error(res.data.errMessage || 'Đăng nhập thất bại');
       }
