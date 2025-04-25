@@ -11,6 +11,11 @@ const bookingService = {
     const res = await axios.get(API_ENDPOINTS.GET_ALL_BOOKINGS);
     return res.data;
   },
+  getAllBookingsBySeller: async (id) => {
+
+    const res = await axios.get(API_ENDPOINTS.GET_ALL_BOOKINGS_BY_SELLER(id));
+    return res.data;
+  },
 
   getBookingById: async (id) => {
     const res = await axios.get(API_ENDPOINTS.GET_BOOKING_BY_ID(id));

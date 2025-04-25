@@ -1,34 +1,33 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { Table, Button, Modal, Popconfirm, message, Input, DatePicker,Descriptions} from 'antd';
-import { fetchBookings, createBooking, deleteBooking, updateBooking , exportBookingPdf, exportBookingTxt} from "../../features/booking/bookingSlice";
-import { fetchSellers } from "../../features/seller/sellerSlice"; // Import fetchSellers
+import { Table, Button, Modal, Popconfirm, Input, Descriptions } from 'antd';
+import { fetchBookingsBySeller, createBooking, deleteBooking, updateBooking, exportBookingPdf, exportBookingTxt } from "../../features/booking/bookingSlice";
 import BookingForm from "../../components/BookingForm";
 import moment from 'moment';
-import { API_ENDPOINTS } from "../../configs/apiConfig"; // Import API endpoints
+import { API_ENDPOINTS } from "../../configs/apiConfig";
 import { toast } from 'react-toastify';
+import { useAuth } from "../../utils/AuthContext"; // Import AuthContext
 
 const { Search } = Input;
 
-const BookingManagement = () => {
+const BookingStaffManagement = () => {
   const dispatch = useDispatch();
   const { bookings, loading } = useSelector((state) => state.booking);
-  const { sellers } = useSelector((state) => state.seller); // Get sellers from redux
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [filteredBookings, setFilteredBookings] = useState(bookings); // filtered bookings state
-  const [checkInDate, setCheckInDate] = useState(null);
-  const [checkOutDate, setCheckOutDate] = useState(null);
+  const [filteredBookings, setFilteredBookings] = useState(bookings);
   const [viewingBooking, setViewingBooking] = useState(null);
+  const { user } = useAuth(); // Lấy thông tin user từ AuthContext
 
   useEffect(() => {
-    dispatch(fetchBookings());
-    dispatch(fetchSellers()); // Fetch sellers when component mounts
-  }, [dispatch]);
+    if (user && user.id) {
+      dispatch(fetchBookingsBySeller(user.id)); // Gọi API lấy danh sách bookings theo sellerId
+    }
+  }, [dispatch, user]);
 
   useEffect(() => {
-    setFilteredBookings(bookings); // Update filtered bookings when `bookings` state changes
+    setFilteredBookings(bookings); // Cập nhật danh sách bookings khi state thay đổi
   }, [bookings]);
 
   const handleExport = (type, id) => {
@@ -38,18 +37,16 @@ const BookingManagement = () => {
         : API_ENDPOINTS.EXPORT_BOOKING_TXT(id);
     window.open(url, "_blank");
   };
+
   const handleCreateOrUpdate = async (formData) => {
     try {
       setSubmitLoading(true);
 
       let result;
-      let updatedBooking;
       if (editingBooking) {
         result = await dispatch(updateBooking({ id: editingBooking.id, formData })).unwrap();
-        updatedBooking = result.data;
       } else {
         result = await dispatch(createBooking(formData)).unwrap();
-        updatedBooking = result.data;
       }
 
       if (result.errCode !== 0) {
@@ -59,7 +56,9 @@ const BookingManagement = () => {
 
       toast.success(editingBooking ? "Cập nhật thành công!" : "Tạo thành công!");
 
-      await dispatch(fetchBookings());
+      if (user && user.id) {
+        dispatch(fetchBookingsBySeller(user.id)); // Làm mới danh sách bookings
+      }
       setIsModalOpen(false);
       setEditingBooking(null);
     } catch (error) {
@@ -74,26 +73,28 @@ const BookingManagement = () => {
     try {
       await dispatch(deleteBooking(id)).unwrap();
       toast.success("Xoá thành công!");
+
+      if (user && user.id) {
+        dispatch(fetchBookingsBySeller(user.id)); // Làm mới danh sách bookings
+      }
     } catch {
       toast.error("Xoá thất bại.");
     }
   };
 
-  // Hàm tìm kiếm với live search và lọc theo ngày
   const handleSearch = (value) => {
     const filtered = bookings.filter((booking) => {
-
       const searchMatch =
         booking.customerName.toLowerCase().includes(value.toLowerCase()) ||
         booking.phoneNumber.toLowerCase().includes(value.toLowerCase()) ||
         booking.serviceRequest.toLowerCase().includes(value.toLowerCase());
 
-      return  searchMatch;
+      return searchMatch;
     });
 
-    setFilteredBookings(filtered); // Cập nhật danh sách booking đã lọc
+    setFilteredBookings(filtered);
   };
-  // Format giá trị tiền
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -228,7 +229,6 @@ const BookingManagement = () => {
         rowKey="id"
         loading={loading}
       />
-
       <Modal
         open={!!viewingBooking}
         title="Chi tiết đặt phòng"
@@ -263,6 +263,9 @@ const BookingManagement = () => {
             <Descriptions.Item label="Giá" span={2}>
               {formatCurrency(viewingBooking.price)}
             </Descriptions.Item>
+            <Descriptions.Item label="Giá nhập" span={2}>
+              {formatCurrency(viewingBooking.originalPrice)}
+            </Descriptions.Item>
             <Descriptions.Item label="Ghi chú" span={2}>
               {viewingBooking.note || "-"}
             </Descriptions.Item>
@@ -281,7 +284,6 @@ const BookingManagement = () => {
           </Descriptions>
         )}
       </Modal>
-
       <Modal
         open={isModalOpen}
         title={editingBooking ? "Chỉnh sửa đặt phòng" : "Tạo mới đặt phòng"}
@@ -300,4 +302,5 @@ const BookingManagement = () => {
     </div>
   );
 };
-export default BookingManagement;
+
+export default BookingStaffManagement;

@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   // Booking endpoints
   CREATE_BOOKING: `${API_BASE_URL}/api/create-booking`,
   GET_ALL_BOOKINGS: `${API_BASE_URL}/api/get-all-bookings`,
+  GET_ALL_BOOKINGS_BY_SELLER: (id) => `${API_BASE_URL}/api/get-booking-by-seller/${id}`,
   GET_BOOKING_DETAIL: (id) => `${API_BASE_URL}/api/get-booking/${id}`,
   UPDATE_BOOKING: (id) => `${API_BASE_URL}/api/update-booking/${id}`,
   DELETE_BOOKING: (id) => `${API_BASE_URL}/api/delete-booking/${id}`,
@@ -23,7 +24,7 @@ export const API_ENDPOINTS = {
 
   //Dashboard endpoints
   GET_DASHBOARD: `${API_BASE_URL}/api/get-dashboard`,
-  
+  GET_DASHBOARD_BY_SELLER: (id) => `${API_BASE_URL}/api/get-seller-dashboard/${id}`,
   //Auth endpoints
   LOGIN: `${API_BASE_URL}/api/login`,
   REGISTER: `${API_BASE_URL}/api/register`,

@@ -1,29 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Row, Statistic, Typography, Spin } from "antd";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip as RechartsTooltip,
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
+  Tooltip as RechartsTooltip,
 } from "recharts";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../configs/apiConfig";
+import { useAuth } from "../../utils/AuthContext";
 
 const { Title } = Typography;
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA00FF', '#00B8D9'];
 
-const Dashboard = () => {
+const DashboardStaff = () => {
+  const { user } = useAuth(); // Lấy thông tin user từ AuthContext
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
 
   useEffect(() => {
-    axios.get(API_ENDPOINTS.GET_DASHBOARD)
+    if (!user || !user.id) return; // Kiểm tra nếu không có user hoặc id
+
+    axios
+      .get(API_ENDPOINTS.GET_DASHBOARD_BY_SELLER(user.id)) // Gọi API với id của staff
       .then((res) => {
         setDashboardData(res.data);
         setLoading(false);
@@ -31,7 +32,7 @@ const Dashboard = () => {
       .catch(() => {
         setLoading(false);
       });
-  }, []);
+  }, [user]);
 
   if (loading || !dashboardData) return <Spin fullscreen />;
 
@@ -41,7 +42,6 @@ const Dashboard = () => {
     totalOriginalPrice = 0,
     profit = 0,
     bookingsByDay = [],
-    bookingsBySeller = [],
   } = dashboardData?.data || {};
 
   return (
@@ -93,7 +93,7 @@ const Dashboard = () => {
       </Row>
 
       <Row gutter={24}>
-        <Col span={14}>
+        <Col span={24}>
           <Card title="Lượt đặt trong 7 ngày qua">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={bookingsByDay}>
@@ -106,31 +106,9 @@ const Dashboard = () => {
             </ResponsiveContainer>
           </Card>
         </Col>
-        <Col span={10}>
-          <Card title="Lượt đặt theo người bán">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={bookingsBySeller}
-                  dataKey="count"
-                  nameKey="seller.fullName"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  label
-                >
-                  {bookingsBySeller.map((_, index) => (
-                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <RechartsTooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-        </Col>
       </Row>
     </div>
   );
 };
 
-export default Dashboard;
+export default DashboardStaff;
