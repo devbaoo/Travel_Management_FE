@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   //Dashboard endpoints
   GET_DASHBOARD: `${API_BASE_URL}/api/get-dashboard`,
   GET_DASHBOARD_BY_SELLER: (id) => `${API_BASE_URL}/api/get-seller-dashboard/${id}`,
+  GET_REVENUE_BY_SELLER: (month, year) => `${API_BASE_URL}/api/get-revenue-by-seller?month=${month}&year=${year}`,
   //Auth endpoints
   LOGIN: `${API_BASE_URL}/api/login`,
   REGISTER: `${API_BASE_URL}/api/register`,
