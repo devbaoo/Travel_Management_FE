@@ -139,7 +139,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
               { max: 255, message: 'Tối đa 255 ký tự' },
             ]}
           >
-            <Input.TextArea style={{ minHeight: 100 }} placeholder="Ví dụ: Dọn phòng, giặt ủi, v.v." />
+            <Input.TextArea style={{ minHeight: 100 }} placeholder="Ví dụ: Khách sạn, phòng v.v." />
           </Form.Item>
         </Col>
       </Row>

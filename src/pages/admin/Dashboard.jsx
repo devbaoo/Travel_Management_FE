@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Statistic, Typography, Spin, DatePicker, Table } from "antd";
+import { Card, Col, Row, Statistic, Typography, Spin, Table } from "antd";
 import {
   PieChart,
   Pie,
@@ -15,6 +15,8 @@ import {
 import axios from "axios";
 import { API_ENDPOINTS } from "../../configs/apiConfig";
 import moment from "moment";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const { Title } = Typography;
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA00FF', '#00B8D9'];
@@ -190,11 +192,13 @@ const Dashboard = () => {
         <Title level={5} style={{ marginBottom: 16 }}>
           Chọn tháng và năm để xem doanh thu
         </Title>
-        <DatePicker
-          picker="month"
-          value={selectedDate}
-          onChange={handleDateChange}
-          format="MM/YYYY"
+        <ReactDatePicker
+          selected={selectedDate ? selectedDate.toDate() : null}
+          onChange={(date) => handleDateChange(moment(date))}
+          dateFormat="MM/yyyy"
+          showMonthYearPicker
+          showFullMonthYearPicker
+          className="ant-input" // Để đồng bộ với giao diện Ant Design
           style={{ width: 200 }}
         />
       </Card>
