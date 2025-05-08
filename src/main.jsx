@@ -8,7 +8,7 @@ import { AuthProvider } from './utils/AuthContext';
 import { ConfigProvider } from 'antd';
 import viVN from 'antd/locale/vi_VN';
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from 'react-toastify'; 
+import { ToastContainer } from 'react-toastify';
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <Provider store={store}>
@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <ConfigProvider locale={viVN}> {/* ← bọc App */}
           <App />
-          <ToastContainer /> 
+          <ToastContainer />
         </ConfigProvider>
       </BrowserRouter>
     </AuthProvider>
