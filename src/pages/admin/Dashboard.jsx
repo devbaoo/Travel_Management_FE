@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Statistic, Typography, Spin, Table } from "antd";
+import { Card, Col, Row, Statistic, Typography, Spin, Table, DatePicker } from "antd";
 import {
   PieChart,
   Pie,
@@ -14,9 +14,8 @@ import {
 } from "recharts";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../configs/apiConfig";
-import moment from "moment";
-import ReactDatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import dayjs from "dayjs";
+
 
 const { Title } = Typography;
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA00FF', '#00B8D9'];
@@ -25,9 +24,13 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [sellerRevenue, setSellerRevenue] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(moment());
+  const [selectedDate, setSelectedDate] = useState(dayjs());
 
   useEffect(() => {
+    const currentDate = dayjs(); // Lấy ngày hiện tại
+    setSelectedDate(currentDate); // Đặt ngày hiện tại làm ngày được chọn
+    fetchSellerRevenue(currentDate.month() + 1, currentDate.year()); // Gọi API với tháng và năm hiện tại
+
     axios.get(API_ENDPOINTS.GET_DASHBOARD)
       .then((res) => {
         setDashboardData(res.data);
@@ -52,6 +55,10 @@ const Dashboard = () => {
   };
 
   const handleDateChange = (date) => {
+    if (!date) {
+      // Handle the case where the date is null (e.g., reset state or show a message)
+      return;
+    }
     const month = date.month() + 1;
     const year = date.year();
     setSelectedDate(date);
@@ -192,13 +199,11 @@ const Dashboard = () => {
         <Title level={5} style={{ marginBottom: 16 }}>
           Chọn tháng và năm để xem doanh thu
         </Title>
-        <ReactDatePicker
-          selected={selectedDate ? selectedDate.toDate() : null}
-          onChange={(date) => handleDateChange(moment(date))}
-          dateFormat="MM/yyyy"
-          showMonthYearPicker
-          showFullMonthYearPicker
-          className="ant-input" // Để đồng bộ với giao diện Ant Design
+        <DatePicker
+          picker="month"
+          value={selectedDate}
+          onChange={handleDateChange}
+          format="MM/YYYY"
           style={{ width: 200 }}
         />
       </Card>
