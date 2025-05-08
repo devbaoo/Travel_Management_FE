@@ -8,13 +8,12 @@ import {
   Row,
   Col
 } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSellers } from "../features/seller/sellerSlice";
 import { toast } from 'react-toastify';
-import { i } from 'framer-motion/client';
-import { useAuth } from '../utils/AuthContext'; // Import the AuthContext
+import { useAuth } from '../utils/AuthContext';
 
 const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
   const [form] = Form.useForm();
@@ -22,7 +21,8 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
   const { sellers } = useSelector(state => state.seller);
   const [price, setPrice] = useState(0);
   const [originalPrice, setOriginalPrice] = useState(0);
-  const { user, isStaff } = useAuth(); // Get user and role-checking function
+  const { user, isStaff } = useAuth();
+  
 
   useEffect(() => {
     dispatch(fetchSellers());
@@ -41,10 +41,11 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
         sellerId: initialValues.sellerId,
         price: initialValues.price,
         originalPrice: initialValues.originalPrice,
-        checkInDate: moment(initialValues.checkInDate),
-        checkOutDate: moment(initialValues.checkOutDate),
+        checkInDate: dayjs(initialValues.checkInDate),
+        checkOutDate: dayjs(initialValues.checkOutDate),
       });
       setPrice(initialValues.price);
+      setOriginalPrice(initialValues.originalPrice);
     } else {
       form.resetFields();
       form.setFieldsValue({
@@ -54,12 +55,13 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
         originalPrice: 0,
       });
       setPrice(0);
+      setOriginalPrice(0);
     }
   }, [initialValues, form]);
 
   useEffect(() => {
     if (isStaff()) {
-      form.setFieldsValue({ sellerId: user.id }); // Automatically set sellerId for staff
+      form.setFieldsValue({ sellerId: user.id });
     }
   }, [isStaff, user, form]);
 
@@ -75,7 +77,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
 
   const validateCheckOutDate = (_, value) => {
     const checkIn = form.getFieldValue('checkInDate');
-    if (checkIn && value && moment(value).isBefore(checkIn)) {
+    if (checkIn && value && value.isBefore(checkIn)) {
       return Promise.reject('Ngày trả phòng phải sau ngày nhận phòng');
     }
     return Promise.resolve();
@@ -83,10 +85,17 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
 
   const handleSubmit = async (values) => {
     try {
-      // Ensure sellerId is set to the staff's ID if the user is a staff member
       if (isStaff()) {
         values.sellerId = user.id;
       }
+      
+      if (values.checkInDate) {
+        values.checkInDate = values.checkInDate.toISOString();
+      }
+      if (values.checkOutDate) {
+        values.checkOutDate = values.checkOutDate.toISOString();
+      }
+      
       await onFinish(values);
       form.resetFields();
     } catch (error) {
@@ -122,10 +131,9 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
             <Input
               placeholder="0123456789"
               maxLength={10}
-              onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')} // Xóa ký tự không phải số
+              onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
             />
           </Form.Item>
-
         </Col>
       </Row>
 
@@ -139,7 +147,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
               { max: 255, message: 'Tối đa 255 ký tự' },
             ]}
           >
-            <Input.TextArea style={{ minHeight: 100 }} placeholder="Ví dụ: Dọn phòng, giặt ủi, v.v." />
+            <Input.TextArea style={{ minHeight: 100 }} />
           </Form.Item>
         </Col>
       </Row>
@@ -176,7 +184,8 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
               style={{ width: '100%' }}
               format="DD/MM/YYYY HH:mm"
               showTime={{ format: 'HH:mm', minuteStep: 15 }}
-              disabledDate={d => d && d < moment().startOf('day')}
+              disabledDate={d => d && d.isBefore(dayjs().startOf('day'))}
+              changeOnBlur
             />
           </Form.Item>
         </Col>
@@ -193,7 +202,8 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
               style={{ width: '100%' }}
               format="DD/MM/YYYY HH:mm"
               showTime={{ format: 'HH:mm', minuteStep: 15 }}
-              disabledDate={d => d && d < moment().startOf('day')}
+              disabledDate={d => d && d.isBefore(dayjs().startOf('day'))}
+              changeOnBlur
             />
           </Form.Item>
         </Col>
