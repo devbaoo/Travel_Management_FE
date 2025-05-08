@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'; // Thay thế moment bằng dayjs
 import {
   Form,
   Input,
@@ -8,12 +9,10 @@ import {
   Row,
   Col
 } from 'antd';
-import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSellers } from "../features/seller/sellerSlice";
 import { toast } from 'react-toastify';
-import { i } from 'framer-motion/client';
 import { useAuth } from '../utils/AuthContext'; // Import the AuthContext
 
 const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
@@ -41,8 +40,8 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
         sellerId: initialValues.sellerId,
         price: initialValues.price,
         originalPrice: initialValues.originalPrice,
-        checkInDate: moment(initialValues.checkInDate),
-        checkOutDate: moment(initialValues.checkOutDate),
+        checkInDate: dayjs(initialValues.checkInDate), // Thay thế moment bằng dayjs
+        checkOutDate: dayjs(initialValues.checkOutDate), // Thay thế moment bằng dayjs
       });
       setPrice(initialValues.price);
     } else {
@@ -67,15 +66,12 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
   const handleOriginalPriceChange = val => setOriginalPrice(val);
 
   const validateOriginalPrice = (_, value) => {
-    if (value > price) {
-      return Promise.reject('Giá nhập không được lớn hơn giá bán');
-    }
-    return Promise.resolve();
+    return Promise.resolve(); // Bỏ qua kiểm tra
   };
 
   const validateCheckOutDate = (_, value) => {
     const checkIn = form.getFieldValue('checkInDate');
-    if (checkIn && value && moment(value).isBefore(checkIn)) {
+    if (checkIn && value && dayjs(value).isBefore(dayjs(checkIn))) { // Thay thế moment bằng dayjs
       return Promise.reject('Ngày trả phòng phải sau ngày nhận phòng');
     }
     return Promise.resolve();
@@ -176,7 +172,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
               style={{ width: '100%' }}
               format="DD/MM/YYYY HH:mm"
               showTime={{ format: 'HH:mm', minuteStep: 15 }}
-              disabledDate={d => d && d < moment().startOf('day')}
+              disabledDate={d => d && d < dayjs().startOf('day')} // Thay thế moment bằng dayjs
             />
           </Form.Item>
         </Col>
@@ -193,7 +189,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
               style={{ width: '100%' }}
               format="DD/MM/YYYY HH:mm"
               showTime={{ format: 'HH:mm', minuteStep: 15 }}
-              disabledDate={d => d && d < moment().startOf('day')}
+              disabledDate={d => d && d < dayjs().startOf('day')} // Thay thế moment bằng dayjs
             />
           </Form.Item>
         </Col>
@@ -222,10 +218,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
           <Form.Item
             name="originalPrice"
             label="Giá nhập"
-            rules={[
-              { required: true, message: 'Vui lòng nhập giá' },
-              { validator: validateOriginalPrice },
-            ]}
+            rules={[{ required: true, message: 'Vui lòng nhập giá' }]} // Chỉ giữ lại yêu cầu nhập
           >
             <InputNumber
               min={0}
