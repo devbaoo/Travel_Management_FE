@@ -140,6 +140,19 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
         </Col>
       </Row>
 
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24}>
+          <Form.Item
+            name="roomClass"
+            label="Hạng phòng"
+            rules={[{ required: true, message: 'Vui lòng nhập hạng phòng' }]}
+          >
+            <Input placeholder="Nhập hạng phòng (ví dụ: VIP, Luxury...)" />
+          </Form.Item>
+        </Col>
+      </Row>
+
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12}>
           <Form.Item
@@ -233,6 +246,7 @@ const BookingForm = ({ onFinish, initialValues = {}, loading }) => {
           </Form.Item>
         </Col>
       </Row>
+
 
       <Row gutter={[16, 16]}>
         <Col xs={24}>
