@@ -29,6 +29,9 @@ const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
     formData.append("fullName", values.fullName);
     formData.append("phoneNumber", values.phoneNumber);
     formData.append("email", values.email);
+    formData.append("bank", values.bank);
+    formData.append("bankAccountName", values.bankAccountName);
+    formData.append("bankAccountNumber", values.bankAccountNumber);
 
     if (!isUpdate) {
       formData.append("password", values.password);
@@ -56,6 +59,9 @@ const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
         fullName: initialValues?.fullName || "",
         phoneNumber: initialValues?.phoneNumber || "",
         email: initialValues?.email || "",
+        bank: initialValues?.bank || "",
+        bankAccountName: initialValues?.bankAccountName || "",
+        bankAccountNumber: initialValues?.bankAccountNumber || "",
       }}
       onFinish={handleFormSubmit}
     >
@@ -81,6 +87,30 @@ const SellerForm = ({ onFinish, initialValues = {}, loading }) => {
         rules={[{ required: true, type: "email", message: "Email không hợp lệ" }]}
       >
         <Input placeholder="example@email.com" />
+      </Form.Item>
+
+      <Form.Item
+        name="bank"
+        label="Ngân hàng"
+        rules={[{ required: true, message: "Vui lòng nhập tên ngân hàng" }]}
+      >
+        <Input placeholder="MB Bank, Vietcombank" />
+      </Form.Item>
+
+      <Form.Item
+        name="bankAccountName"
+        label="Tên chủ tài khoản"
+        rules={[{ required: true, message: "Vui lòng nhập tên chủ tài khoản" }]}
+      >
+        <Input placeholder="NGUYEN VAN A" />
+      </Form.Item>
+
+      <Form.Item
+        name="bankAccountNumber"
+        label="Số tài khoản"
+        rules={[{ required: true, message: "Vui lòng nhập số tài khoản" }]}
+      >
+        <Input placeholder="0123456789" />
       </Form.Item>
 
       {!isUpdate && (

@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { Table, Button, Modal, Popconfirm, message, Input, DatePicker,Descriptions, Row, Col } from 'antd';
+import { Table, Button, Modal, Popconfirm, message, Input, DatePicker,Descriptions, Row, Col, Menu, Dropdown } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
 import { fetchBookings, createBooking, deleteBooking, updateBooking , exportBookingPdf, exportBookingTxt} from "../../features/booking/bookingSlice";
 import { fetchSellers } from "../../features/seller/sellerSlice"; // Import fetchSellers
 import BookingForm from "../../components/BookingForm";
@@ -35,9 +36,13 @@ const BookingManagement = () => {
     const url =
       type === "pdf"
         ? API_ENDPOINTS.EXPORT_BOOKING_PDF(id)
-        : API_ENDPOINTS.EXPORT_BOOKING_TXT(id);
+        : type === "txt"
+        ? API_ENDPOINTS.EXPORT_BOOKING_TXT(id)
+        : API_ENDPOINTS.EXPORT_BOOKING_IMG(id);
+
     window.open(url, "_blank");
   };
+
   const handleCreateOrUpdate = async (formData) => {
     try {
       setSubmitLoading(true);
@@ -176,27 +181,31 @@ const BookingManagement = () => {
       ),
     },
     {
-      title: "Xuất",
+      title: "Chức năng",
       width: 150, // Đặt chiều rộng cố định cho cột
       align: "center", // Căn giữa nội dung
-      render: (_, record) => (
-        <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
-          <Button
-            size="small"
-            type="default"
-            onClick={() => handleExport("pdf", record.id)}
-          >
-            PDF
-          </Button>
-          <Button
-            size="small"
-            type="default"
-            onClick={() => handleExport("txt", record.id)}
-          >
-            TXT
-          </Button>
-        </div>
-      ),
+      render: (_, record) => {
+        const exportMenu = (
+          <Menu
+            onClick={({ key }) => handleExport(key, record.id)}
+            items={[
+              { key: "pdf", label: "PDF" },
+              { key: "txt", label: "TXT" },
+              { key: "img", label: "IMG" },
+            ]}
+          />
+        );
+
+        return (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Dropdown overlay={exportMenu} trigger={['click']}>
+              <Button size="small" type="default">
+                Xuất
+              </Button>
+            </Dropdown>
+          </div>
+        );
+      },
     },
   ];
 
